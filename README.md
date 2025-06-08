@@ -1,139 +1,113 @@
-# Vibe Search Engine (FAISS + FastAPI)
+# NYU Corner - Intelligent Place Discovery
 
-A local semantic search engine for places, with:
-- Sentence-Transformers for embeddings
-- FAISS for fast similarity search
-- FastAPI for backend
-- JavaScript + HTML/CSS for frontend
-
-## Project Structure
-```
-nyu-corner-datathon-2025/
-├── data/                      # All data-related files
-│   ├── raw/                  # Original, immutable data
-│   │   ├── media.csv
-│   │   ├── places.csv
-│   │   └── reviews.csv
-│   ├── processed/            # Cleaned and processed data
-│   │   ├── merged.csv
-│   │   └── image_embeddings.csv
-│   └── models/              # Trained models and embeddings
-│       ├── metadata.index
-│       └── reviews.index
-│
-├── notebooks/               # Jupyter notebooks for development
-│   ├── 01_data_preparation.ipynb
-│   ├── 02_model_training.ipynb
-│   └── 03_hybrid_search.ipynb
-│
-├── backend/                # FastAPI backend service
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── main.py        # App setup
-│   │   ├── core/          # Core functionality
-│   │   │   ├── config.py
-│   │   │   ├── embeddings.py
-│   │   │   ├── hybrid_search.py
-│   │   │   └── text_utils.py
-│   │   └── api/
-│   │       └── routes/
-│   │           └── search.py
-│   └── requirements.txt
-│
-├── frontend/              # Static frontend
-│   ├── index.html
-│   └── static/
-│       ├── api.js
-│       ├── ui.js
-│       └── style.css
-│
-├── scripts/              # Utility scripts
-│   ├── build_index.py   # Build FAISS indices
-│   └── run_server.sh    # Launch server
-│
-└── README.md
-```
-
-## Setup Instructions
-
-### Backend Setup
-
-```bash
-cd backend
-python -m venv .venv
-source .venv/bin/activate   # or .venv\Scripts\activate on Windows
-pip install -r requirements.txt
-```
-
-### Data Preparation
-1. Place raw data files in `data/raw/`
-2. Run the data preparation notebook:
-```bash
-jupyter notebook notebooks/01_data_preparation.ipynb
-```
-
-### Model Training
-1. Run the model training notebook:
-```bash
-jupyter notebook notebooks/02_model_training.ipynb
-```
-
-### Running the Application
-
-1. Start the backend server:
-```bash
-./scripts/run_server.sh
-```
-
-2. Start the frontend server:
-```bash
-cd frontend
-python -m http.server 5500
-```
-
-3. Visit `http://localhost:5500` in your browser
+A sophisticated place recommendation system that uses hybrid search combining dense embeddings, sparse embeddings, and image-based search to help NYU students discover places around campus.
 
 ## Features
 
-### Hybrid Search
-The application uses a sophisticated hybrid search combining:
-1. Dense Semantic Search (Sentence-Transformers)
-   - Understands context and meaning
-   - Good for natural language queries
+- **Hybrid Search System**:
+  - Dense Embeddings (Semantic Search)
+  - Sparse Embeddings (Keyword Search)
+  - Image-Based Search
+  - Configurable weights for each search type
 
-2. Sparse Text Search (SPLADE)
-   - Excellent for keyword matching
-   - Preserves important terms
+- **Modern Tech Stack**:
+  - FastAPI Backend
+  - Static Frontend
+  - FAISS for Vector Search
+  - Sentence Transformers
+  - SPLADE for Sparse Embeddings
+  - CLIP for Image Understanding
 
-3. Image Search (CLIP)
-   - Visual similarity search
-   - Multimodal understanding
+## Project Structure
 
-### Configurable Weights
-You can adjust search weights through the API:
-- `weight_dense`: Semantic understanding (default: 0.4)
-- `weight_sparse`: Keyword matching (default: 0.3)
-- `weight_image`: Visual similarity (default: 0.3)
+```
+.
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── routes/
+│   │   └── core/
+│   ├── Dockerfile
+│   ├── Procfile
+│   └── requirements.txt
+├── frontend/
+│   ├── static/
+│   │   ├── api.js
+│   │   ├── style.css
+│   │   └── ui.js
+│   └── index.html
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── models/
+└── scripts/
+    └── build_index.py
+```
 
-## Development
+## Local Development
 
-### Notebooks
-The notebooks directory contains the research and development process:
-1. `01_data_preparation.ipynb`: Data cleaning and preprocessing
-2. `02_model_training.ipynb`: Model training and evaluation
-3. `03_hybrid_search.ipynb`: Hybrid search implementation
+1. **Setup Python Environment**:
+   ```bash
+   python3.11 -m venv venv
+   source venv/bin/activate
+   pip install -r backend/requirements.txt
+   ```
 
-### Adding New Features
-1. Develop and test in notebooks
-2. Implement in the backend
-3. Update the frontend
-4. Document in README
+2. **Prepare Data**:
+   ```bash
+   python scripts/build_index.py
+   ```
+
+3. **Run Backend**:
+   ```bash
+   cd backend
+   uvicorn app.main:app --reload
+   ```
+
+4. **Run Frontend**:
+   Serve the frontend directory using any static file server
+
+## Deployment
+
+### Backend (Railway)
+
+1. Push code to GitHub
+2. Connect repository to Railway
+3. Set environment variables:
+   - `ALLOWED_ORIGINS`: Comma-separated list of allowed origins
+   - `MODEL_CACHE_DIR`: Directory for model storage
+   - `PROCESSED_DATA_DIR`: Directory for processed data
+
+### Frontend (Vercel)
+
+1. Push code to GitHub
+2. Connect repository to Vercel
+3. Set environment variables:
+   - `VITE_API_URL`: Your Railway backend URL
+
+## API Documentation
+
+Access the API documentation at `/docs` when running the backend server.
+
+### Search Endpoint
+
+`GET /search`
+
+Parameters:
+- `q`: Search query (required)
+- `top_k`: Number of results (default: 10)
+- `weight_dense`: Weight for dense embeddings (0.0-1.0)
+- `weight_sparse`: Weight for sparse embeddings (0.0-1.0)
+- `weight_image`: Weight for image embeddings (0.0-1.0)
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
-This project was developed as part of the 2025 Corner-DSC-BAC Datathon.
 
-## Acknowledgements
-Built collaboratively by:
-- [Tomas Gutierrez](https://github.com/tom4sg)
-- Yarden Morad
-- [Robin Chen](https://github.com/localhost433)
+MIT License
