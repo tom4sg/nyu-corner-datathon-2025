@@ -43,18 +43,17 @@ source .venv/bin/activate   # or .venv\Scripts\activate on Windows
 pip install -r requirements.txt
 ```
 
-### Data Preparation
-1. Place raw data files in `data/raw/`
-2. Run the data preparation notebook:
+### Data Preparation & Model Training
+1. The complete data processing, model training, and search implementation can be found in:
 ```bash
-jupyter notebook notebooks/01_data_preparation.ipynb
+jupyter notebook notebooks/rag_system.ipynb
 ```
 
-### Model Training
-1. Run the model training notebook:
-```bash
-jupyter notebook notebooks/02_model_training.ipynb
-```
+This notebook contains:
+- Data cleaning and preprocessing
+- Model training and evaluation
+- Hybrid search implementation (Dense + Sparse + Image)
+- Search evaluation and testing
 
 ### Running the Application
 
@@ -95,11 +94,15 @@ You can adjust search weights through the API:
 
 ## Development
 
-### Notebooks
-The notebooks directory contains the research and development process:
-1. `01_data_preparation.ipynb`: Data cleaning and preprocessing
-2. `02_model_training.ipynb`: Model training and evaluation
-3. `03_hybrid_search.ipynb`: Hybrid search implementation
+### Notebook
+The `notebooks/rag_system.ipynb` contains the complete research and development process:
+- Data preparation and cleaning
+- Implementation of three search types:
+  * Dense embeddings using Sentence-Transformers
+  * Sparse embeddings using SPLADE
+  * Image embeddings using CLIP
+- Search combination and weight optimization
+- Performance evaluation and testing
 
 ### Adding New Features
 1. Develop and test in notebooks
