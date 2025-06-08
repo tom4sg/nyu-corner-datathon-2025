@@ -1,4 +1,4 @@
-const BACKEND_URL = "http://127.0.0.1:8000";
+const BACKEND_URL = process.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 export async function searchPlaces(query) {
     const response = await fetch(`${BACKEND_URL}/search?q=${encodeURIComponent(query)}`);

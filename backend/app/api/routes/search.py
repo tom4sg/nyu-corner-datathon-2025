@@ -3,45 +3,44 @@
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
-from app.core.faiss_io import load_faiss_index
-from app.core.embeddings import encode_texts
+from app.core.hybrid_search import HybridSearchEngine
 from app.core.config import settings
 import pandas as pd
-import numpy as np
-import math
 
 router = APIRouter()
 
-# Load FAISS index and metadata
-faiss_index = load_faiss_index(settings.METADATA_INDEX_PATH)
+# Load metadata and initialize search engine
 metadata_df = pd.read_csv(settings.PROCESSED_CSV_PATH)
+search_engine = HybridSearchEngine(metadata_df)
 
 @router.get("/search")
-async def search(q: str = Query(..., description="Search query"), top_k: int = 5):
+async def search(
+    q: str = Query(..., description="Search query"),
+    top_k: int = 10,
+    weight_dense: float = Query(0.4, ge=0.0, le=1.0),
+    weight_sparse: float = Query(0.3, ge=0.0, le=1.0),
+    weight_image: float = Query(0.3, ge=0.0, le=1.0)
+):
     """
-    Search places metadata based on text query.
+    Hybrid search combining dense, sparse, and image embeddings
     """
     try:
-        query_vec = encode_texts([q], normalize=True)
-        query_vec = np.array(query_vec).astype('float32')
+        # Normalize weights to sum to 1
+        total_weight = weight_dense + weight_sparse + weight_image
+        if total_weight != 1.0:
+            weight_dense = weight_dense / total_weight
+            weight_sparse = weight_sparse / total_weight
+            weight_image = weight_image / total_weight
 
-        distances, indices = await run_in_threadpool(
-            faiss_index.search,
-            query_vec,
-            top_k
+        # Perform hybrid search
+        results = await run_in_threadpool(
+            search_engine.search,
+            query=q,
+            top_k=top_k,
+            weight_dense=weight_dense,
+            weight_sparse=weight_sparse,
+            weight_image=weight_image
         )
-
-        results = []
-
-        for dist, idx in zip(distances[0], indices[0]):
-            if idx == -1:
-                continue  # Invalid index
-            if math.isnan(dist) or math.isinf(dist):
-                continue  # Skip bad distance
-
-            row = metadata_df.iloc[idx].to_dict()
-            row['distance'] = max(float(dist), 0.0)  # Clamp to 0 if needed
-            results.append(row)
 
         if not results:
             return JSONResponse(
@@ -50,9 +49,8 @@ async def search(q: str = Query(..., description="Search query"), top_k: int = 5
             )
 
         return {"results": results}
-    
+
     except Exception as e:
-        # Global error fallback
         return JSONResponse(
             status_code=500,
             content={"error": f"Search failed: {str(e)}"}

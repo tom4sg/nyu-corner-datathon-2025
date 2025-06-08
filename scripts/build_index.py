@@ -10,21 +10,37 @@ os.environ["TRANSFORMERS_NO_ADVISORY_WARNINGS"] = "1"
 import sys
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
+import torch
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../backend")))
 
 from app.core.text_utils import combining_text, concat_reviews
 from app.core.embeddings import load_model, encode_texts, embed_and_pool, chunk_by_tokens
-from app.core.faiss_io import build_faiss_index, save_faiss_index, METADATA_INDEX_PATH, REVIEWS_INDEX_PATH
+from app.core.faiss_io import build_faiss_index, save_faiss_index
 from app.core.config import settings
+
+# Import new embedding models
+from fastembed import SparseTextEmbedding
+from transformers import CLIPProcessor, CLIPModel
+from sentence_transformers import SentenceTransformer
 
 # Paths
 RAW_MEDIA = settings.RAW_MEDIA_PATH
 RAW_PLACES = settings.RAW_PLACES_PATH
 RAW_REVIEWS = settings.RAW_REVIEWS_PATH
 PROCESSED_CSV = settings.PROCESSED_CSV_PATH
-METADATA_INDEX_PATH = settings.METADATA_INDEX_PATH
-REVIEWS_INDEX_PATH = settings.REVIEWS_INDEX_PATH
+DENSE_INDEX_PATH = Path(__file__).resolve().parents[1] / "data/indices/dense.index"
+SPARSE_INDEX_PATH = Path(__file__).resolve().parents[1] / "data/indices/sparse.index"
+IMAGE_INDEX_PATH = Path(__file__).resolve().parents[1] / "data/indices/image.index"
+
+# Initialize models
+def init_models(device='cuda' if torch.cuda.is_available() else 'cpu'):
+    print("Initializing models...")
+    dense_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2', device=device)
+    sparse_model = SparseTextEmbedding(model_name="prithivida/Splade_PP_en_v1")
+    clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+    clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device)
+    return dense_model, sparse_model, clip_processor, clip_model
 
 # Helpers
 def parallel_apply(df, func, workers=4):
@@ -33,141 +49,133 @@ def parallel_apply(df, func, workers=4):
         results = list(executor.map(func, [row for _, row in df.iterrows()]))
     return results
 
-def chunk_text_with_tokenizer(text):
-    """Chunk text using the tokenizer from the loaded model."""
-    model = load_model()
-    tokenizer = model.tokenizer
-    return chunk_by_tokens(text, tokenizer, max_wp=256)
-
 def load_data():
     """Load datasets from CSV files."""
-    print("Loading datasets.")
+    print("Loading datasets...")
     media_df = pd.read_csv(RAW_MEDIA)
     places_df = pd.read_csv(RAW_PLACES)
     reviews_df = pd.read_csv(RAW_REVIEWS)
-    return media_df, places_df, reviews_df
+    
+    # Also load image embeddings if available
+    image_embeddings_path = Path(__file__).resolve().parents[1] / "data/processed/image_embeddings_sorted.csv"
+    image_df = pd.read_csv(image_embeddings_path) if image_embeddings_path.exists() else None
+    
+    return media_df, places_df, reviews_df, image_df
 
 def prepare_merge_df(media_df, places_df, reviews_df):
-    """Prepare the merged DataFrame for metadata and reviews."""
-    print("Processing datasets.")
+    """Prepare the merged DataFrame."""
+    print("Processing datasets...")
     reviews_df = reviews_df.drop_duplicates(subset=['place_id', 'review_text'])
     media_df = media_df.drop_duplicates(subset=['place_id', 'media_url'])
 
+    # Aggregate reviews and media
     reviews_agg = reviews_df.groupby('place_id')['review_text'].apply(list).reset_index()
     media_agg = media_df.groupby('place_id')['media_url'].apply(list).reset_index()
 
+    # Merge everything
     merge_df = places_df.merge(media_agg, on='place_id', how='inner')
     merge_df = merge_df.merge(reviews_agg, on='place_id', how='inner')
+    
+    # Add concatenated reviews
+    agg_reviews = reviews_df.groupby('place_id')['review_text'].apply(concat_reviews).reset_index(name='concat_reviews')
+    merge_df = merge_df.merge(agg_reviews, on='place_id', how='left')
+    
     merge_df = merge_df.drop_duplicates(subset='place_id').reset_index(drop=True)
-    return merge_df, reviews_df
-
-def generate_metadata_embeddings(merge_df):
-    """Generate metadata embeddings and build FAISS index."""
-    print("Combining text fields in parallel.")
-    merge_df['combined_text'] = parallel_apply(merge_df, combining_text, workers=os.cpu_count() // 2)
-
-    print("Generating text embeddings.")
-    model = load_model()
-    batch_size = 64
-    embeddings = []
-    for i in tqdm(range(0, len(merge_df), batch_size), desc="Encoding combined texts"):
-        batch = merge_df['combined_text'].iloc[i: i + batch_size].tolist()
-        batch_embeddings = encode_texts(batch)
-        embeddings.append(batch_embeddings)
-    embeddings = np.vstack(embeddings)
-    merge_df['metadata_embedding'] = embeddings.tolist()
+    
+    # Combine text fields
+    print("Combining text fields...")
+    merge_df['combined_text'] = merge_df.apply(combining_text, axis=1)
+    
     return merge_df
 
-def build_and_save_metadata_index(merge_df):
-    """Build and save the FAISS index for metadata embeddings."""
-    print("Building metadata FAISS index.")
-    all_embeddings = np.array(merge_df['metadata_embedding'].tolist(), dtype='float32')
-    metadata_index = build_faiss_index(all_embeddings)
-    save_faiss_index(metadata_index, METADATA_INDEX_PATH)
+def generate_embeddings(merge_df, dense_model, sparse_model, image_df=None):
+    """Generate all types of embeddings."""
+    print("Generating embeddings...")
+    batch_size = 32
+    
+    # Dense embeddings
+    print("Generating dense embeddings...")
+    dense_embeddings = []
+    for i in tqdm(range(0, len(merge_df), batch_size), desc="Dense embeddings"):
+        batch = merge_df['combined_text'].iloc[i:i + batch_size].tolist()
+        batch_embeddings = dense_model.encode(batch, normalize_embeddings=True)
+        dense_embeddings.append(batch_embeddings)
+    dense_embeddings = np.vstack(dense_embeddings)
+    merge_df['dense_metadata_embedding'] = dense_embeddings.tolist()
 
-def generate_review_embeddings(reviews_df):
-    print("Combining and chunking reviews.")
-    agg_text_df = reviews_df.groupby('place_id')['review_text'].apply(lambda s: ' '.join(s)).reset_index()
+    # Sparse embeddings
+    print("Generating sparse embeddings...")
+    sparse_embeddings = []
+    for i in tqdm(range(0, len(merge_df), batch_size), desc="Sparse embeddings"):
+        batch = merge_df['combined_text'].iloc[i:i + batch_size].tolist()
+        batch_embeddings = list(sparse_model.embed(batch))
+        sparse_embeddings.extend(batch_embeddings)
+    merge_df['sparse_metadata_embedding'] = sparse_embeddings
 
-    model = load_model()
-    tokenizer = model.tokenizer
+    # Add image embeddings if available
+    if image_df is not None:
+        print("Adding image embeddings...")
+        merge_df = merge_df.merge(
+            image_df[['place_id', 'image_embedding']], 
+            on='place_id', 
+            how='left'
+        )
+    
+    return merge_df
 
-    # Chunk all reviews
-    with ProcessPoolExecutor(max_workers = min(8, os.cpu_count() // 2)) as executor:
-        chunks_list = list(tqdm(executor.map(chunk_text_with_tokenizer, agg_text_df['review_text']),
-                                total=len(agg_text_df), desc="Chunking reviews"))
-    agg_text_df['chunks'] = chunks_list
+def build_and_save_indices(merge_df):
+    """Build and save all FAISS indices."""
+    print("Building and saving indices...")
+    
+    # Dense index
+    dense_embeddings = np.array(merge_df['dense_metadata_embedding'].tolist(), dtype='float32')
+    dense_index = build_faiss_index(dense_embeddings)
+    save_faiss_index(dense_index, DENSE_INDEX_PATH)
+    
+    # Sparse index (convert sparse to dense for FAISS)
+    sparse_embeddings = np.array([
+        sparse_to_dense(emb, dim=30315) for emb in merge_df['sparse_metadata_embedding']
+    ], dtype='float32')
+    sparse_index = build_faiss_index(sparse_embeddings)
+    save_faiss_index(sparse_index, SPARSE_INDEX_PATH)
+    
+    # Image index if available
+    if 'image_embedding' in merge_df.columns:
+        image_embeddings = np.array(merge_df['image_embedding'].tolist(), dtype='float32')
+        image_index = build_faiss_index(image_embeddings)
+        save_faiss_index(image_index, IMAGE_INDEX_PATH)
 
-    # Flatten chunks
-    flat_chunks = []
-    chunk_counts = []
-
-    for chunks in agg_text_df['chunks']:
-        flat_chunks.extend(chunks)
-        chunk_counts.append(len(chunks))
-
-    print(f"Total chunks to embed: {len(flat_chunks)}")
-
-    # Embed all chunks in big batches
-    batch_size = 128
-    all_vecs = []
-
-    for i in tqdm(range(0, len(flat_chunks), batch_size), desc="Encoding review chunks"):
-        batch = flat_chunks[i:i + batch_size]
-        batch_vecs = model.encode(batch, normalize_embeddings=True, show_progress_bar=False)
-        all_vecs.append(batch_vecs)
-
-    all_vecs = np.vstack(all_vecs)  # (N_chunks, dim)
-
-    # Pool efficiently
-    pooled_vecs = []
-
-    idx = 0
-    for count in chunk_counts:
-        if count == 0:
-            pooled_vec = np.zeros(all_vecs.shape[1])  # Empty, fallback
-        else:
-            pooled_vec = all_vecs[idx:idx + count].mean(axis=0)
-        pooled_vecs.append(pooled_vec)
-        idx += count
-
-    agg_text_df['review_embedding'] = [v.tolist() for v in pooled_vecs]
-
-    return agg_text_df
-
-def build_and_save_review_index(merge_df):
-    """Build and save the FAISS index for review embeddings."""
-    if 'review_embedding' in merge_df.columns:
-        print("Building review FAISS index.")
-        all_review_embeddings = np.array(merge_df['review_embedding'].tolist(), dtype='float32')
-        review_index = build_faiss_index(all_review_embeddings)
-        save_faiss_index(review_index, REVIEWS_INDEX_PATH)
+def sparse_to_dense(sparse_embedding, dim=30315):
+    """Convert sparse embedding to dense vector."""
+    dense_vec = np.zeros(dim, dtype=np.float32)
+    dense_vec[sparse_embedding.indices] = sparse_embedding.values
+    return dense_vec
 
 def save_processed_csv(merge_df):
-    """Save the merged DataFrame to a CSV file."""
-    print(f"Saving merged CSV at {PROCESSED_CSV}...")
+    """Save the processed DataFrame."""
+    print(f"Saving processed CSV at {PROCESSED_CSV}...")
     PROCESSED_CSV.parent.mkdir(exist_ok=True, parents=True)
     merge_df.to_csv(PROCESSED_CSV, index=False)
 
 def main():
+    # Initialize models
+    dense_model, sparse_model, clip_processor, clip_model = init_models()
+    
     # Load datasets
-    media_df, places_df, reviews_df = load_data()
-    merge_df, reviews_df = prepare_merge_df(media_df, places_df, reviews_df)
-
-    # Generate metadata embeddings and build FAISS index
-    merge_df = generate_metadata_embeddings(merge_df)
-    build_and_save_metadata_index(merge_df)
-
-    # Generate review embeddings and build FAISS index
-    agg_text_df = generate_review_embeddings(reviews_df)
-    merge_df = merge_df.merge(agg_text_df[['place_id', 'review_embedding']], on='place_id', how='left')
-
-    # Build and save review index
-    build_and_save_review_index(merge_df)
-
+    media_df, places_df, reviews_df, image_df = load_data()
+    
+    # Prepare merged DataFrame
+    merge_df = prepare_merge_df(media_df, places_df, reviews_df)
+    
+    # Generate all embeddings
+    merge_df = generate_embeddings(merge_df, dense_model, sparse_model, image_df)
+    
+    # Build and save indices
+    build_and_save_indices(merge_df)
+    
     # Save processed CSV
     save_processed_csv(merge_df)
-
+    
     print("Index building completed successfully.")
 
 if __name__ == "__main__":

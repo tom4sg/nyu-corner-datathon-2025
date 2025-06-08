@@ -1,14 +1,24 @@
 # === Python related ===
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
+*$py.class
+*.so
 .Python
-env/
-venv/
-.venv/
-*.sqlite3
-*.log
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # === FAISS indices & data outputs ===
 data/
@@ -26,3 +36,50 @@ dist/
 
 # === Environment / Secrets (if later added) ===
 .env
+
+# Virtual Environment
+.venv
+env/
+venv/
+ENV/
+
+# IDEs
+.idea/
+*.swp
+*.swo
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# Project specific
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/models/*
+!data/models/.gitkeep
+
+# Large files
+*.csv
+*.index
+*.bin
+*.h5
+*.pkl
+*.joblib
+
+# Logs
+*.log
+logs/
+tmp/
+
+# === Deployment ===
+.vercel
+.railway
+.env.local
+.env.development
+.env.production
+
+# === Docker ===
+.docker/
+docker-compose.override.yml

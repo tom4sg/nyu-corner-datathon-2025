@@ -31,9 +31,8 @@ export function clearResults() {
 export function displayResults(results) {
   const resultsDiv = document.getElementById('results');
 
-  if (!resultsObj.results || resultsObj.results.length === 0) {
-    const message = resultsObj.message || "No results found.";
-    resultsDiv.innerHTML = `<p>${message}</p>`;
+  if (!results || results.length === 0) {
+    resultsDiv.innerHTML = '<p>No results found.</p>';
     return;
   }
 
@@ -50,20 +49,36 @@ export function displayResults(results) {
         .filter(tag => tag.length > 0);
 
       tagsHTML = tags.map(tag => {
-        const cleanTag = tag.replace(/_/g, ' ').toLowerCase(); // Replace underscores and lowercase
-        const emoji = tagEmojiMap[cleanTag] || '🏷️';  // Default emoji if not found
-        const displayTag = cleanTag.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '); // Title Case
+        const cleanTag = tag.replace(/_/g, ' ').toLowerCase();
+        const emoji = tagEmojiMap[cleanTag] || '🏷️';
+        const displayTag = cleanTag.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         return `<span class="tag">${emoji} ${displayTag}</span>`;
       }).join(' ');
     }
 
+    // Format scores as percentages
+    const hybridPercent = (item.hybrid_score * 100).toFixed(1);
+    const densePercent = (item.dense_score * 100).toFixed(1);
+    const sparsePercent = (item.sparse_score * 100).toFixed(1);
+    const imagePercent = item.image_score ? (item.image_score * 100).toFixed(1) : null;
+
     div.innerHTML = `
-          <h3>${item.name || 'Unnamed Place'} ${item.emojis || ''}</h3>
-          <p>Neighborhood: ${item.neighborhood || 'Unknown'}</p>
-          <div class="tags">${tagsHTML}</div>
-          <p>Description: ${item.short_description || item.description || 'No description available.'}</p>
-          <p class="distance">L2 Distance: ${item.distance.toFixed(4)}</p>
-      `;
+      <h3>${item.name || 'Unnamed Place'} ${item.emojis || ''}</h3>
+      <p>Neighborhood: ${item.neighborhood || 'Unknown'}</p>
+      <div class="tags">${tagsHTML}</div>
+      <p>Description: ${item.description || 'No description available.'}</p>
+      <div class="scores">
+        <div class="score-bar">
+          <div class="score-fill" style="width: ${hybridPercent}%"></div>
+          <span class="score-label">Match Score: ${hybridPercent}%</span>
+        </div>
+        <div class="score-details">
+          <span>Dense: ${densePercent}%</span>
+          <span>Sparse: ${sparsePercent}%</span>
+          ${imagePercent ? `<span>Image: ${imagePercent}%</span>` : ''}
+        </div>
+      </div>
+    `;
     resultsDiv.appendChild(div);
   });
 }
