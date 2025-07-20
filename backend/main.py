@@ -106,6 +106,17 @@ def merge_matches(dense_result, sparse_result, image_result) -> List[Dict]:
 
     return formatted_results
 
+def format_place_strings(places: List[Dict]) -> List[str]:
+    rerank_map = {}
+    for place in places:
+        name = place.get("name", "Unknown")
+        emoji = place.get("emoji", "")
+        neighborhood = place.get("neighborhood", "Unknown area")
+        desc = place.get("description", "No description")
+
+        key = f"{emoji} {name} ({neighborhood}) — {desc}"
+        rerank_map[key] = place
+    return rerank_map
 
 
 @app.get("/")
@@ -175,31 +186,38 @@ async def search_places(request: SearchRequest):
 
         # Merge all results
         hybrid_results = merge_matches(dense_results, sparse_results, image_results)
+        formatted_results = format_place_strings(hybrid_results)
 
         # Rerank with BGE
         reranked = pc.inference.rerank(
             model="bge-reranker-v2-m3",
             query=query,
-            documents=hybrid_results,
-            rank_fields=["description"],
+            documents=list(formatted_results.keys()),
             top_n=15,
             return_documents=True,
-            parameters={"truncate": "END"}
         )
 
+        # Add reranked score to places
+        top_places = []
+        for doc in reranked.data:
+            key = doc.document.text
+            original_place = formatted_results[key].copy()
+            original_place["score"] = round(doc.score, 6)
+            top_places.append(original_place)
+        
         # Transform into response model
         places = []
-        for doc in reranked.data:
+        for doc in top_places:
             place = Place(
-                place_id=doc.document["id"],
-                name=doc.document["name"],
-                neighborhood=doc.document.get("neighborhood"),
+                place_id=doc["id"],
+                name=doc["name"],
+                neighborhood=doc.get("neighborhood"),
                 latitude=None,
                 longitude=None,
                 tags=None,
-                description=doc.document.get("description"),
-                emoji=doc.document.get("emoji"),
-                score=doc.score
+                description=doc.get("description"),
+                emoji=doc.get("emoji"),
+                score=doc.get("score")
             )
             places.append(place)
 
@@ -214,4 +232,6 @@ async def search_places(request: SearchRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    import os
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)

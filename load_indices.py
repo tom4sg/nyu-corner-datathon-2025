@@ -19,8 +19,8 @@ image_index = pc.Index("corner-clip")
 
 #%%
 
-image_df = pd.read_csv('Datasets/image_embeddings_sorted.csv')
-merged_df = pd.read_csv('Datasets/Processed Datasets/merged.csv')
+image_df = pd.read_csv('datasets/image_embeddings_sorted.csv')
+merged_df = pd.read_csv('datasets/processed/merged.csv')
 full_df = pd.merge(merged_df, image_df, on="place_id", how="inner")
 full_df.head()
 
@@ -191,6 +191,8 @@ print(results)
 """
 Let's load metadata sparse embeddings
 """
+import re
+import ast
 
 def extract_sparse_embedding(sparse_str):
     """Extracts values and indices from a stringified SparseEmbedding object."""
@@ -330,7 +332,7 @@ def merge_matches(dense_result, sparse_result, image_result) -> List[Dict]:
 We have loaded all the indices! Let's try to figure out a hybrid search methodology
 """
 
-query = "pub"
+query = "coffee upper west side"
 
 inputs = processor(text=[query], return_tensors="pt", padding=True)
 query_embedding = clip_model.get_text_features(**inputs)
@@ -373,7 +375,54 @@ dense_results = dense_index.query(
 )
 # %%
 
-results = merge_matches(dense_results, sparse_results, image_results)
-print(results)
+hybrid_results = merge_matches(dense_results, sparse_results, image_results)
+print(hybrid_results)
 
+#%%
+
+def format_place_strings(places: List[Dict]) -> List[str]:
+    rerank_map = {}
+    for place in places:
+        name = place.get("name", "Unknown")
+        emoji = place.get("emoji", "")
+        neighborhood = place.get("neighborhood", "Unknown area")
+        desc = place.get("description", "No description")
+
+        key = f"{emoji} {name} ({neighborhood}) — {desc}"
+        rerank_map[key] = place
+    return rerank_map
+
+# Example usage
+formatted_results = format_place_strings(hybrid_results)
+print(formatted_results.keys())
+
+# %%
+
+reranked_results = pc.inference.rerank(
+    model="bge-reranker-v2-m3",
+    query=query,
+    documents=list(formatted_results.keys()),
+    top_n=10,
+    return_documents=True,
+)
+
+print(reranked_results)
+# %%
+from pprint import pprint
+
+top_places = [] 
+for doc in reranked_results.data:
+    key = doc.document.text
+    original_place = formatted_results[key].copy()  # Avoid mutating original dict
+    original_place["score"] = round(doc.score, 6)  # Replace with rerank score
+    top_places.append(original_place)
+
+
+#%%
+
+
+
+
+top_places = [formatted_results[doc.document.text] for doc in reranked_results.data]
+pprint(top_places)
 # %%
