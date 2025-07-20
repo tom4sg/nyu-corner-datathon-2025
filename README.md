@@ -25,7 +25,7 @@ This project consists of:
 
 - **Frontend**: Next.js 15 with TypeScript and Tailwind CSS
 - **Backend**: FastAPI with Python
-- **AI Models**: 
+- **Embedding and Reranking**: 
   - CLIP for image-text understanding
   - Sentence Transformers for dense embeddings
   - SPLADE for sparse embeddings
