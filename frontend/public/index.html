@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Search - Find the Best NYU Venues</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            padding: 40px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+        }
+
+        .search-button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .search-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s;
+        }
+
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .place-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .place-emoji {
+            font-size: 1.5rem;
+        }
+
+        .place-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .place-neighborhood {
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .place-description {
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .place-score {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .query-display {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .results-count {
+            color: #667eea;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Vibe Search</h1>
+            <p>Find the best NYU venues and study spots</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="Search for coffee shops, study spots, restaurants, bars..."
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button id="searchButton" class="search-button" onclick="searchPlaces()">
+                    Search
+                </button>
+            </div>
+
+            <div id="errorMessage" class="error" style="display: none;"></div>
+
+            <div id="loading" class="loading" style="display: none;">
+                🔍 Searching for the perfect spots...
+            </div>
+
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        // Get the current domain for API calls
+        const API_BASE = window.location.origin;
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchPlaces();
+            }
+        }
+
+        async function searchPlaces() {
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const errorMessage = document.getElementById('errorMessage');
+
+            const query = searchInput.value.trim();
+            if (!query) {
+                showError('Please enter a search term');
+                return;
+            }
+
+            // Show loading state
+            searchButton.disabled = true;
+            loading.style.display = 'block';
+            results.innerHTML = '';
+            errorMessage.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE}/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+
+            } catch (error) {
+                console.error('Search error:', error);
+                showError('Failed to search. Please try again.');
+            } finally {
+                searchButton.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayResults(data) {
+            const results = document.getElementById('results');
+            
+            if (!data.places || data.places.length === 0) {
+                results.innerHTML = `
+                    <div class="no-results">
+                        <h3>No places found</h3>
+                        <p>Try searching for something else like "coffee", "study spot", or "restaurant"</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const stats = `
+                <div class="stats">
+                    <span class="query-display">Results for: "${data.query}"</span>
+                    <span class="results-count">${data.total_results} places found</span>
+                </div>
+            `;
+
+            const placesHtml = data.places.map(place => `
+                <div class="result-card">
+                    <div class="place-header">
+                        <span class="place-emoji">${place.emoji || '📍'}</span>
+                        <span class="place-name">${place.name}</span>
+                        <span class="place-neighborhood">${place.neighborhood || ''}</span>
+                    </div>
+                    ${place.description ? `<div class="place-description">${place.description}</div>` : ''}
+                    <div class="place-score">Score: ${(place.score * 100).toFixed(1)}%</div>
+                </div>
+            `).join('');
+
+            results.innerHTML = stats + placesHtml;
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        // Auto-focus search input on page load
+        window.onload = function() {
+            document.getElementById('searchInput').focus();
+        };
+    </script>
+</body>
+</html> 

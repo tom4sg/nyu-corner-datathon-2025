@@ -6,5 +6,28 @@ datasets/
 *.csv
 *.joblib
 *.index
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints
+
+# Environment variables
 .env
+
+# Python cache
 __pycache__/
+
+# Development files
+load_indices.py
+merge_dense_and_sparse_df.joblib
+
+# IDE files
+.vscode/
+.idea/
+
+# Frontend build files
+frontend/.next/
+frontend/node_modules/
+frontend/.env.local
+frontend/.env.production.local
+frontend/.env.development.local
