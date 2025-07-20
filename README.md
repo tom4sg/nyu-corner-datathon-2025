@@ -1,6 +1,6 @@
 # Vibio - NYC Venue Recommendation System
 
-**NYU x Corner Datathon 2025 - 1st Place Winner** 🏆
+**NYU x Corner Datathon 2025 - 1st Place Winner** 
 
 A full-stack web application that provides intelligent venue recommendations for NYC using advanced AI techniques including hybrid search, image analysis, and natural language processing.
 
@@ -17,11 +17,9 @@ A full-stack web application that provides intelligent venue recommendations for
   />
 </p>
 
-## 🚀 Live Demo
+Visit [Vibio](https://nyu-corner-datathon-2025-7yn3.vercel.app/) to experience the intelligent venue search system.
 
-Visit [Vibio](https://your-app-url.com) to experience the intelligent venue search system.
-
-## 🏗️ Architecture
+## Architecture
 
 This project consists of:
 
@@ -35,7 +33,7 @@ This project consists of:
 - **Vector Database**: Pinecone for efficient similarity search
 - **Deployment**: Railway (backend) + Vercel (frontend)
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Backend
 ```python
@@ -44,7 +42,7 @@ uvicorn
 sentence-transformers
 fastembed
 transformers
-pinecone-client
+pinecone
 pydantic
 python-dotenv
 ```
@@ -57,7 +55,7 @@ typescript
 tailwindcss
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.8+
@@ -138,7 +136,7 @@ sparse_results = sparse_index.query(sparse_embedding)
 final_results = rerank(merge_results(image_results, dense_results, sparse_results))
 ```
 
-## 📊 API Endpoints
+## API Endpoints
 
 ### Search Places
 ```http
@@ -173,7 +171,7 @@ Content-Type: application/json
 GET /health
 ```
 
-## 🎯 Features
+## Features
 
 - **Natural Language Search**: Search using conversational queries
 - **Multi-modal Understanding**: Combines text, image, and metadata analysis
@@ -201,7 +199,7 @@ corner-datathon/
 └── README.md              # This file
 ```
 
-## 🚀 Deployment
+## Deployment
 
 ### Backend (Railway)
 The backend is automatically deployed to Railway with the configuration in `railway.json`.
@@ -209,7 +207,7 @@ The backend is automatically deployed to Railway with the configuration in `rail
 ### Frontend (Vercel)
 The frontend can be deployed to Vercel with the configuration in `vercel.json`.
 
-## 🏆 Original Solution
+## Original Solution
 
 The original datathon solution was implemented in Jupyter Notebook (`datathon.ipynb`) and demonstrated:
 
@@ -222,6 +220,6 @@ This web application brings that solution to life with a production-ready interf
 
 ---
 
-## 📹 Demo Video
+## Demo Video
 
 https://github.com/user-attachments/assets/d139b7e4-dce4-49a3-95ab-e7e8c6897689
