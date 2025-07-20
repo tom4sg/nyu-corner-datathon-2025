@@ -75,7 +75,7 @@ export default function Home() {
                   {places.length} places found
                 </span>
               </div>
-              <ResultsList places={places} query={query} />
+              <ResultsList places={places} />
             </div>
           )}
 
@@ -91,7 +91,7 @@ export default function Home() {
           {!loading && places.length === 0 && query && !error && (
             <div className="mt-8 text-center">
               <p className="text-blue-100 text-lg">
-                No places found for "{query}". Try a different search term!
+                No places found for &quot;{query}&quot;. Try a different search term!
               </p>
             </div>
           )}

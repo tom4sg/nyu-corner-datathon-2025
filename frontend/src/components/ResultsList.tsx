@@ -4,10 +4,9 @@ import { Place } from '@/types/place';
 
 interface ResultsListProps {
   places: Place[];
-  query: string;
 }
 
-export default function ResultsList({ places, query }: ResultsListProps) {
+export default function ResultsList({ places }: ResultsListProps) {
   return (
     <div className="space-y-4">
       {places.map((place, index) => (
