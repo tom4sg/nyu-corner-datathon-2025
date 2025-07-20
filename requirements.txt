@@ -1,0 +1,17 @@
+pandas
+numpy
+matplotlib
+seaborn
+tqdm
+sentence-transformers
+fastembed
+joblib
+transformers
+faiss-cpu
+scikit-learn
+spacy
+torch
+pinecone
+dotenv
+grpcio
+googleapis-common-protos
