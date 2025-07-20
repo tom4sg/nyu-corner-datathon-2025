@@ -186,6 +186,7 @@ results = dense_index.query(
 # %%
 
 print(results)
+
 # %%
 """
 Let's load metadata sparse embeddings
@@ -281,3 +282,98 @@ results = sparse_index.query(
     include_metadata=True,
     include_values=False
 )
+# %%
+
+print(results)
+
+#%%
+
+from typing import List, Dict
+
+def merge_matches(dense_result, sparse_result, image_result) -> List[Dict]:
+    """
+    Merges matches from all three indexes into a single deduplicated list.
+    Keeps only the highest scoring version of each unique 'id',
+    but defers ranking to a reranker.
+    """
+
+    all_matches = (
+        dense_result.get("matches", []) +
+        sparse_result.get("matches", []) +
+        image_result.get("matches", [])
+    )
+
+    # Deduplicate by 'id', keeping highest-score version (optional, still helpful)
+    merged = {}
+    for match in all_matches:
+        match_id = match["id"]
+        if match_id not in merged or match["score"] > merged[match_id]["score"]:
+            merged[match_id] = match
+
+    # No sorting here — reranker decides final order
+    formatted_results = []
+    for match in merged.values():
+        meta = match.get("metadata", {})
+        formatted_results.append({
+            "id": match["id"],
+            "name": meta.get("name"),
+            "neighborhood": meta.get("neighborhood"),
+            "description": meta.get("description"),
+            "emoji": meta.get("emoji"),
+            "score": match["score"]  # Keep original for context if needed
+        })
+
+    return formatted_results
+
+# %%
+"""
+We have loaded all the indices! Let's try to figure out a hybrid search methodology
+"""
+
+query = "pub"
+
+inputs = processor(text=[query], return_tensors="pt", padding=True)
+query_embedding = clip_model.get_text_features(**inputs)
+query_embedding = query_embedding / query_embedding.norm(p=2, dim=-1, keepdim=True)
+query_embedding = query_embedding.detach().cpu().numpy().astype('float32').flatten().tolist()
+
+image_results = image_index.query(
+    namespace="images", 
+    vector=query_embedding, 
+    top_k=20,
+    include_metadata=True,
+    include_values=False
+)
+
+sparse_embedding = list(sparse_model.embed(query))
+values = sparse_embedding[0].values.tolist()
+indices = sparse_embedding[0].indices.tolist()
+
+
+sparse_results = sparse_index.query(
+    namespace="metadata",
+    sparse_vector={
+      "values": values,
+      "indices": indices
+    }, 
+    top_k=20,
+    include_metadata=True,
+    include_values=False
+)
+
+query_embedding = metadata_model.encode([query], normalize_embeddings=True)[0].astype('float32').reshape(1, -1)
+query_embedding = query_embedding.flatten().tolist()
+
+dense_results = dense_index.query(
+    namespace="metadata", 
+    vector=query_embedding, 
+    top_k=20,
+    include_metadata=True,
+    include_values=False
+)
+# %%
+
+results = merge_matches(dense_results, sparse_results, image_results)
+print(results)
+
+# %%

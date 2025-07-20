@@ -12,6 +12,10 @@ scikit-learn
 spacy
 torch
 pinecone
-dotenv
+python-dotenv
 grpcio
 googleapis-common-protos
+fastapi
+uvicorn
+pydantic
+requests
