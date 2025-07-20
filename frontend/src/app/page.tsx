@@ -17,8 +17,13 @@ export default function Home() {
     setQuery(searchQuery);
 
     try {
-      // Replace with your Railway backend URL when deployed
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/search`, {
+      // API URL must be set in production
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!apiUrl) {
+        throw new Error('API URL not configured. Please set NEXT_PUBLIC_API_URL environment variable.');
+      }
+      
+      const response = await fetch(`${apiUrl}/search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
