@@ -23,7 +23,7 @@ export default function SearchBox({ onSearch, loading }: SearchBoxProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-2xl p-6">
+    <div className="bg-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
       <div className="flex gap-4">
         <div className="flex-1">
           <input
@@ -32,14 +32,14 @@ export default function SearchBox({ onSearch, loading }: SearchBoxProps) {
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Search for coffee shops, study spots, restaurants, bars..."
-            className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+            className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-xl focus:border-gray-900 focus:outline-none transition-colors text-gray-900"
             disabled={loading}
           />
         </div>
         <button
           onClick={handleSubmit}
           disabled={!query.trim() || loading}
-          className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          className="px-8 py-3 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
           {loading ? (
             <div className="flex items-center gap-2">
@@ -62,7 +62,7 @@ export default function SearchBox({ onSearch, loading }: SearchBoxProps) {
               onSearch(suggestion);
             }}
             disabled={loading}
-            className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors disabled:opacity-50"
+            className="px-3 py-1 text-sm bg-white hover:bg-gray-100 text-gray-900 border border-gray-300 rounded-full transition-colors disabled:opacity-50"
           >
             {suggestion}
           </button>

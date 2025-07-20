@@ -12,7 +12,7 @@ export default function ResultsList({ places }: ResultsListProps) {
       {places.map((place, index) => (
         <div
           key={place.place_id}
-          className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 p-6 border-l-4 border-purple-500"
+          className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 p-6 border-l-4 border-gray-900"
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -27,7 +27,7 @@ export default function ResultsList({ places }: ResultsListProps) {
               </div>
               
               {place.neighborhood && (
-                <p className="text-purple-600 font-medium mb-2">
+                <p className="text-gray-600 font-medium mb-2">
                   📍 {place.neighborhood}
                 </p>
               )}
