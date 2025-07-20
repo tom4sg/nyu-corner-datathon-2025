@@ -2,7 +2,7 @@
 
 **NYU x Corner Datathon 2025 - 1st Place Winner** 
 
-A full-stack web application that provides intelligent venue recommendations for NYC using advanced AI techniques including hybrid search, image analysis, and natural language processing.
+A full-stack web application that provides venue recommendations for NYC using RAG with Hybrid Search & Reranking. 
 
 <p align="center">
   <img
@@ -17,7 +17,7 @@ A full-stack web application that provides intelligent venue recommendations for
   />
 </p>
 
-Visit [Vibio](https://nyu-corner-datathon-2025-7yn3.vercel.app/) to experience the intelligent venue search system.
+Visit [Vibio](https://nyu-corner-datathon-2025-7yn3.vercel.app/) to use it yourself!
 
 ## Architecture
 
@@ -25,7 +25,7 @@ This project consists of:
 
 - **Frontend**: Next.js 15 with TypeScript and Tailwind CSS
 - **Backend**: FastAPI with Python
-- **AI Models**: 
+- **Embedding and Reranking**: 
   - CLIP for image-text understanding
   - Sentence Transformers for dense embeddings
   - SPLADE for sparse embeddings
