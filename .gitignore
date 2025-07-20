@@ -1,5 +1,10 @@
+# Virtual environment
 venv/
+
+# Large dataset files
+datasets/
+*.csv
 *.joblib
+*.index
 .env
 __pycache__/
-.ipynb_checkpoints
