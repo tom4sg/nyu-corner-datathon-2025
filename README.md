@@ -17,7 +17,7 @@ A full-stack web application that provides venue recommendations for NYC using R
   />
 </p>
 
-Visit [Vibio](https://nyu-corner-datathon-2025-7yn3.vercel.app/) to experience the intelligent venue search system.
+Visit [Vibio](https://nyu-corner-datathon-2025-7yn3.vercel.app/) to use it yourself!
 
 ## Architecture
 
