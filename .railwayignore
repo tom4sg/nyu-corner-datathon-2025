@@ -1,3 +1,6 @@
+# Frontend files (not needed for backend deployment)
+public/
+
 # Development files
 datathon.ipynb
 load_indices.py
@@ -21,4 +24,7 @@ __pycache__/
 .git/
 
 # Vercel config (not needed for Railway)
-vercel.json 
+vercel.json
+
+# Root requirements (using backend/requirements.txt instead)
+requirements.txt 

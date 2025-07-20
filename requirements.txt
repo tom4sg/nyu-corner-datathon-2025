@@ -12,7 +12,7 @@ scikit-learn
 spacy
 torch
 pinecone
-python-dotenv
+dotenv
 grpcio
 googleapis-common-protos
 fastapi
