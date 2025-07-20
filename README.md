@@ -2,7 +2,7 @@
 
 **NYU x Corner Datathon 2025 - 1st Place Winner** 
 
-A full-stack web application that provides intelligent venue recommendations for NYC using advanced AI techniques including hybrid search, image analysis, and natural language processing.
+A full-stack web application that provides venue recommendations for NYC using RAG with Hybrid Search & Reranking. 
 
 <p align="center">
   <img
