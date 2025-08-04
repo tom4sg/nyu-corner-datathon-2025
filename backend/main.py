@@ -139,7 +139,7 @@ async def pinecone_image_query(clip_embedding):
         image_index.query(
             namespace="images", 
             vector=clip_embedding, 
-            top_k=20,
+            top_k=10,
             include_metadata=True,
             include_values=False
         )
@@ -150,7 +150,7 @@ async def pinecone_sparse_query(values, indices):
         sparse_index.query(
             namespace="metadata", 
             sparse_vector={"values": values, "indices": indices},
-            top_k=20,
+            top_k=10,
             include_metadata=True,
             include_values=False
         )
@@ -161,7 +161,7 @@ async def pinecone_dense_query(dense_embedding):
         dense_index.query(
             namespace="metadata", 
             vector=dense_embedding, 
-            top_k=20,
+            top_k=10,
             include_metadata=True,
             include_values=False
         )
@@ -222,7 +222,7 @@ async def search_places(request: SearchRequest):
             model="bge-reranker-v2-m3",
             query=query,
             documents=list(formatted_results.keys()),
-            top_n=15,
+            top_n=8,
             return_documents=True,
         )
 
@@ -239,7 +239,7 @@ async def search_places(request: SearchRequest):
             
             llm_input += f"{key}\n reviews:\n\n"
 
-            for review in reviews[:5]:  # only first 5
+            for review in reviews[:3]:  # only first 3
                 llm_input += f"- {review}\n"
 
             llm_input += "\n\n"
@@ -265,7 +265,7 @@ async def search_places(request: SearchRequest):
           f"\nsearch_engine_results: {llm_input}"
           f"\nas if you were responding to this query:{query}"
           f"\nStart with something like 'I think you'd like the following:'"
-          f"\nOnly include the top 4 results"
+          f"\nOnly talk about the top 3 results"
         )
 
         llm_response = llm.invoke(prompt)
