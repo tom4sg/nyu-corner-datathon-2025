@@ -7,6 +7,7 @@ from transformers import CLIPProcessor, CLIPModel
 from sentence_transformers import SentenceTransformer
 from fastembed import SparseTextEmbedding
 from pinecone import Pinecone
+from langchain_anthropic import ChatAnthropic
 from typing import List, Optional, Dict, Any
 import ast
 import re
@@ -27,13 +28,22 @@ class Place(BaseModel):
     longitude: Optional[float] = None
     tags: Optional[List[str]] = None
     description: Optional[str] = None
+    reviews: Optional[str] = None
     emoji: Optional[str] = None
     score: float
 
 class SearchResponse(BaseModel):
+    llm_response: str
     places: List[Place]
     total_results: int
     query: str
+
+# Let's load the LLM with LangChain
+
+llm = ChatAnthropic(
+    model="claude-3-5-sonnet-20240620",
+    anthropic_api_key=os.getenv("PERSONAL_ANTHROPIC")
+)
 
 # Now define the API with FastAPI
 
@@ -100,6 +110,7 @@ def merge_matches(dense_result, sparse_result, image_result) -> List[Dict]:
             "name": meta.get("name"),
             "neighborhood": meta.get("neighborhood"),
             "description": meta.get("description"),
+            "reviews": meta.get("reviews"),
             "emoji": meta.get("emoji"),
             "score": match["score"]
         })
@@ -197,13 +208,23 @@ async def search_places(request: SearchRequest):
             return_documents=True,
         )
 
-        # Add reranked score to places
+        # Add reranked score to places and format for LLM input
         top_places = []
+        llm_input = ""
+
         for doc in reranked.data:
             key = doc.document.text
             original_place = formatted_results[key].copy()
             original_place["score"] = round(doc.score, 6)
             top_places.append(original_place)
+            reviews = ast.literal_eval(original_place["reviews"])
+            
+            llm_input += f"{key}\n reviews:\n\n"
+
+            for review in reviews[:5]:  # only first 5
+                llm_input += f"- {review}\n"
+
+            llm_input += "\n\n"
         
         # Transform into response model
         places = []
@@ -216,12 +237,22 @@ async def search_places(request: SearchRequest):
                 longitude=None,
                 tags=None,
                 description=doc.get("description"),
+                reviews=doc.get("reviews"),
                 emoji=doc.get("emoji"),
                 score=doc.get("score")
             )
             places.append(place)
+        
+        prompt = (f"Summarize the following results"
+          f"\nsearch_engine_results: {llm_input}"
+          f"\nas if you were responding to this query:{query}"
+          f"\nStart with something like 'I think you'd like the following:'"
+        )
+
+        llm_response = llm.invoke(prompt)
 
         return SearchResponse(
+            llm_response=llm_response.content,
             places=places,
             total_results=len(places),
             query=query
