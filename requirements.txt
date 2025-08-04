@@ -24,3 +24,4 @@ flagembedding
 peft
 datasets
 langchain-anthropic
+asyncio

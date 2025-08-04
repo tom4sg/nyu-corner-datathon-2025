@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+import asyncio
 from pydantic import BaseModel
 from transformers import CLIPProcessor, CLIPModel
 from sentence_transformers import SentenceTransformer
@@ -9,6 +10,7 @@ from fastembed import SparseTextEmbedding
 from pinecone import Pinecone
 from langchain_anthropic import ChatAnthropic
 from typing import List, Optional, Dict, Any
+from concurrent.futures import ThreadPoolExecutor
 import ast
 import re
 
@@ -129,6 +131,42 @@ def format_place_strings(places: List[Dict]) -> List[str]:
         rerank_map[key] = place
     return rerank_map
 
+# Define Async Pinecone query functions per index
+executor = ThreadPoolExecutor()
+
+async def pinecone_image_query(clip_embedding):
+    return await asyncio.get_event_loop().run_in_executor(executor, lambda: (
+        image_index.query(
+            namespace="images", 
+            vector=clip_embedding, 
+            top_k=20,
+            include_metadata=True,
+            include_values=False
+        )
+    ))
+
+async def pinecone_sparse_query(values, indices):
+    return await asyncio.get_event_loop().run_in_executor(executor, lambda: (
+        sparse_index.query(
+            namespace="metadata", 
+            sparse_vector={"values": values, "indices": indices},
+            top_k=20,
+            include_metadata=True,
+            include_values=False
+        )
+    ))
+
+async def pinecone_dense_query(dense_embedding):
+    return await asyncio.get_event_loop().run_in_executor(executor, lambda: (
+        dense_index.query(
+            namespace="metadata", 
+            vector=dense_embedding, 
+            top_k=20,
+            include_metadata=True,
+            include_values=False
+        )
+    ))
+
 
 @app.get("/")
 async def root():
@@ -160,40 +198,20 @@ async def search_places(request: SearchRequest):
         clip_embedding = clip_embedding / clip_embedding.norm(p=2, dim=-1, keepdim=True)
         clip_embedding = clip_embedding.detach().cpu().numpy().astype('float32').flatten().tolist()
 
-        image_results = image_index.query(
-            namespace="images", 
-            vector=clip_embedding, 
-            top_k=20,
-            include_metadata=True,
-            include_values=False
-        )
-
         # Get SPLADE (sparse) embedding
         sparse_embedding = list(sparse_model.embed(query))
         values = sparse_embedding[0].values.tolist()
         indices = sparse_embedding[0].indices.tolist()
 
-        sparse_results = sparse_index.query(
-            namespace="metadata",
-            sparse_vector={
-                "values": values,
-                "indices": indices
-            },
-            top_k=20,
-            include_metadata=True,
-            include_values=False
-        )
-
         # Get dense embedding
         dense_embedding = metadata_model.encode([query], normalize_embeddings=True)[0].astype('float32').tolist()
 
-        dense_results = dense_index.query(
-            namespace="metadata", 
-            vector=dense_embedding, 
-            top_k=20,
-            include_metadata=True,
-            include_values=False
-        )
+        # Async Pinecone queries
+        image_q = pinecone_image_query(clip_embedding)
+        sparse_q = pinecone_sparse_query(values, indices)
+        dense_q = pinecone_dense_query(dense_embedding)
+
+        image_results, sparse_results, dense_results = await asyncio.gather(image_q, sparse_q, dense_q)
 
         # Merge all results
         hybrid_results = merge_matches(dense_results, sparse_results, image_results)
