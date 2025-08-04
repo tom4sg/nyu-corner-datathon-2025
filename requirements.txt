@@ -19,3 +19,8 @@ fastapi
 uvicorn
 pydantic
 requests
+sentencepiece
+flagembedding
+peft
+datasets
+langchain-anthropic

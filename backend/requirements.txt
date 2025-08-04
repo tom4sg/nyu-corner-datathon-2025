@@ -8,3 +8,4 @@ pinecone
 torch
 scipy
 python-dotenv
+langchain-anthropic
