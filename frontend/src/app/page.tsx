@@ -55,9 +55,9 @@ export default function Home() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
             <img 
-              src="/vibio_favicon_multi_res.ico" 
+              src="/vibio_favicon_128x128.png" 
               alt="Vibio Icon" 
-              className="w-12 h-12"
+              className="w-12 h-12 object-contain"
             />
             <h1 className="text-5xl font-bold text-gray-900">
               Vibio 
