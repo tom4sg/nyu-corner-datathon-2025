@@ -53,18 +53,18 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="flex items-center justify-center gap-3 mb-4 w-full">
+            <h1 className="text-5xl font-bold text-gray-900 text-center">
+              Vibio 
+            </h1>
             <img 
-              src="/vibio_favicon_128x128.png" 
+              src="/vibio_favicon_128x128_black_transparent.png" 
               alt="Vibio Icon" 
               className="w-12 h-12 object-contain"
             />
-            <h1 className="text-5xl font-bold text-gray-900">
-              Vibio 
-            </h1>
           </div>
           <p className="text-xl text-gray-600">
-            Find the best NYC restaurants and bars with deep search
+            Find the best NYC restaurants and bars
           </p>
         </div>
 
