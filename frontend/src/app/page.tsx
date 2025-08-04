@@ -53,11 +53,18 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Vibio 
-          </h1>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img 
+              src="/vibio_favicon_multi_res.ico" 
+              alt="Vibio Icon" 
+              className="w-12 h-12"
+            />
+            <h1 className="text-5xl font-bold text-gray-900">
+              Vibio 
+            </h1>
+          </div>
           <p className="text-xl text-gray-600">
-            Find the best NYC restaurants and bars
+            Find the best NYC restaurants and bars with deep search
           </p>
         </div>
 
@@ -97,7 +104,7 @@ export default function Home() {
           {loading && (
             <div className="mt-8 text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-              <p className="mt-2 text-gray-600">Searching for the perfect spots...</p>
+              <p className="mt-2 text-gray-600">Performing deep search across thousands of venues...</p>
             </div>
           )}
 
