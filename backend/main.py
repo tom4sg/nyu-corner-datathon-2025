@@ -247,6 +247,7 @@ async def search_places(request: SearchRequest):
           f"\nsearch_engine_results: {llm_input}"
           f"\nas if you were responding to this query:{query}"
           f"\nStart with something like 'I think you'd like the following:'"
+          f"\nOnly include the top 4 results"
         )
 
         llm_response = llm.invoke(prompt)
