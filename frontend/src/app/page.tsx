@@ -9,7 +9,6 @@ import { Place } from '@/types/place';
 export default function Home() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [llmResponse, setLlmResponse] = useState<string>('');
-  const [shouldStreamResults, setShouldStreamResults] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -41,7 +40,6 @@ export default function Home() {
       const data = await response.json();
       setPlaces(data.places || []);
       setLlmResponse(data.llm_response || '');
-      setShouldStreamResults(false); // Reset streaming state
     } catch (err) {
       setError('Failed to search. Please try again.');
       console.error('Search error:', err);
@@ -81,7 +79,6 @@ export default function Home() {
               <LLMResponseBox 
                 llmResponse={llmResponse} 
                 query={query} 
-                onStreamingComplete={() => setShouldStreamResults(true)}
               />
               
               <div className="flex justify-between items-center mb-6">
@@ -92,7 +89,7 @@ export default function Home() {
                   {places.length} places found
                 </span>
               </div>
-              <ResultsList places={places} shouldStartStreaming={shouldStreamResults} />
+              <ResultsList places={places} />
             </div>
           )}
 

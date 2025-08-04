@@ -5,44 +5,16 @@ import { useState, useEffect } from 'react';
 
 interface ResultsListProps {
   places: Place[];
-  shouldStartStreaming?: boolean;
 }
 
-export default function ResultsList({ places, shouldStartStreaming = false }: ResultsListProps) {
-  const [visiblePlaces, setVisiblePlaces] = useState<Place[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
-
-  useEffect(() => {
-    if (places.length > 0 && shouldStartStreaming) {
-      setIsStreaming(true);
-      setVisiblePlaces([]);
-      
-      let index = 0;
-      const interval = setInterval(() => {
-        if (index < places.length) {
-          setVisiblePlaces(prev => [...prev, places[index]]);
-          index++;
-        } else {
-          setIsStreaming(false);
-          clearInterval(interval);
-        }
-      }, 300); // Show one result every 300ms
-
-      return () => clearInterval(interval);
-    } else if (places.length > 0 && !shouldStartStreaming) {
-      // If we have places but shouldn't stream yet, show them all
-      setVisiblePlaces(places);
-      setIsStreaming(false);
-    }
-  }, [places, shouldStartStreaming]);
+export default function ResultsList({ places }: ResultsListProps) {
 
   return (
     <div className="space-y-4">
-      {visiblePlaces.map((place, index) => (
+      {places.map((place, index) => (
         <div
           key={place.place_id}
-          className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 p-6 border-l-4 border-gray-900 animate-in slide-in-from-bottom-4 fade-in duration-500"
-          style={{ animationDelay: `${index * 100}ms` }}
+          className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 p-6 border-l-4 border-gray-900"
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -90,13 +62,6 @@ export default function ResultsList({ places, shouldStartStreaming = false }: Re
           </div>
         </div>
       ))}
-      
-      {isStreaming && (
-        <div className="text-center py-4">
-          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
-          <p className="mt-2 text-gray-600 text-sm">Loading more results...</p>
-        </div>
-      )}
     </div>
   );
 } 
