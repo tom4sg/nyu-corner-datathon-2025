@@ -58,7 +58,7 @@ export default function Home() {
               Vibio 
             </h1>
             <img 
-              src="/vibio_favicon_128x128_black_transparent.png" 
+              src="/vibio_pin_128x128.png" 
               alt="Vibio Icon" 
               className="w-12 h-12 object-contain"
             />
