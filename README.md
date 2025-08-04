@@ -30,6 +30,7 @@ This project consists of:
   - Sentence Transformers for dense embeddings
   - SPLADE for sparse embeddings
   - BGE Reranker for final ranking
+- **LLM Integration**: Claude 3.5 Sonnet for intelligent response generation
 - **Vector Database**: Pinecone for efficient similarity search
 - **Deployment**: Railway (backend) + Vercel (frontend)
 
@@ -45,6 +46,7 @@ transformers
 pinecone
 pydantic
 python-dotenv
+langchain-anthropic
 ```
 
 ### Frontend
@@ -77,6 +79,7 @@ pip install -r requirements.txt
 3. **Set environment variables:**
 ```bash
 PINECONE_API_KEY=your_pinecone_api_key
+PERSONAL_ANTHROPIC=your_anthropic_api_key
 ```
 
 4. **Run the server:**
@@ -151,12 +154,14 @@ Content-Type: application/json
 **Response:**
 ```json
 {
+  "llm_response": "I think you'd like the following:\n\n1. Matcha Bar NYC in East Village: This cozy matcha cafe offers traditional Japanese vibes with excellent matcha drinks and a serene atmosphere perfect for relaxing or studying.\n\n2. Cha Cha Matcha in SoHo: Known for their Instagram-worthy matcha creations and trendy atmosphere.\n\n3. Matchaful in West Village: Offers high-quality ceremonial grade matcha with a minimalist aesthetic.\n\nThese spots all offer authentic matcha experiences with different vibes - from traditional to trendy. Perfect for matcha enthusiasts!",
   "places": [
     {
       "place_id": "venue_123",
       "name": "Matcha Bar NYC",
       "neighborhood": "East Village",
       "description": "Cozy matcha cafe with traditional Japanese vibes",
+      "reviews": "['Amazing matcha quality', 'Great atmosphere for studying', 'Authentic Japanese experience']",
       "emoji": "🍵",
       "score": 0.95
     }
@@ -176,6 +181,7 @@ GET /health
 - **Natural Language Search**: Search using conversational queries
 - **Multi-modal Understanding**: Combines text, image, and metadata analysis
 - **Intelligent Ranking**: Advanced reranking using BGE model
+- **AI-Powered Summaries**: LLM-generated responses that summarize the best spots
 - **Real-time Results**: Fast search with sub-second response times
 - **Modern UI**: Clean, responsive interface built with Next.js and Tailwind
 
@@ -184,14 +190,15 @@ GET /health
 ```
 corner-datathon/
 ├── backend/
-│   ├── main.py              # FastAPI application
+│   ├── main.py              # FastAPI application with LLM integration
 │   ├── requirements.txt     # Python dependencies
 │   └── Procfile            # Railway deployment config
 ├── frontend/
 │   ├── src/
 │   │   ├── app/            # Next.js app directory
-│   │   ├── components/     # React components
+│   │   ├── components/     # React components (including LLMResponseBox)
 │   │   └── types/          # TypeScript definitions
+│   ├── public/             # Static assets (SVGs, etc.)
 │   ├── package.json        # Node.js dependencies
 │   └── next.config.ts      # Next.js configuration
 ├── datasets/               # Data files
