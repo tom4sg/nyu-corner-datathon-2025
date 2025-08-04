@@ -20,7 +20,7 @@ export default function ResultsList({ places }: ResultsListProps) {
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-2xl">📍</span>
+                <span className="text-2xl">{place.emoji || '📍'}</span>
                 <h3 className="text-xl font-bold text-gray-800">
                   {place.name}
                 </h3>
