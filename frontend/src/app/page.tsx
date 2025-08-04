@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import SearchBox from '@/components/SearchBox';
 import ResultsList from '@/components/ResultsList';
+import LLMResponseBox from '@/components/LLMResponseBox';
 import { Place } from '@/types/place';
 
 export default function Home() {
   const [places, setPlaces] = useState<Place[]>([]);
+  const [llmResponse, setLlmResponse] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -37,6 +39,7 @@ export default function Home() {
 
       const data = await response.json();
       setPlaces(data.places || []);
+      setLlmResponse(data.llm_response || '');
     } catch (err) {
       setError('Failed to search. Please try again.');
       console.error('Search error:', err);
@@ -72,6 +75,9 @@ export default function Home() {
           {/* Results */}
           {places.length > 0 && (
             <div className="mt-8">
+              {/* LLM Response */}
+              <LLMResponseBox llmResponse={llmResponse} query={query} />
+              
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-semibold text-gray-900">
                   Search Results
