@@ -30,3 +30,12 @@ body {
 .font-inter {
   font-family: 'Inter', sans-serif;
 }
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.dot-pulse {
+  animation: dot-pulse 1.5s ease-in-out infinite;
+}
