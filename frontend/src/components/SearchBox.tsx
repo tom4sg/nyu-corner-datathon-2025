@@ -24,7 +24,7 @@ export default function SearchBox({ onSearch, loading }: SearchBoxProps) {
 
   return (
     <div className="bg-gray-50 rounded-2xl shadow-md hover:shadow-lg border border-gray-200 p-6 transition-all duration-200">
-      <div className="flex gap-4">
+      <div className="flex gap-2">
         <div className="flex-1">
           <input
             type="text"
@@ -39,7 +39,7 @@ export default function SearchBox({ onSearch, loading }: SearchBoxProps) {
         <button
           onClick={handleSubmit}
           disabled={!query.trim() || loading}
-          className="w-12 h-12 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center"
+          className="px-4 py-3 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center"
         >
           {loading ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
