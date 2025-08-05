@@ -32,7 +32,7 @@ export default function SearchBox({ onSearch, loading }: SearchBoxProps) {
             value={searchMode}
             onChange={(e) => setSearchMode(e.target.value)}
             disabled={loading}
-            className="h-[52px] px-4 py-3 text-sm border-2 border-gray-300 rounded-l-2xl focus-within:ring-2 ring-gray-400 focus:border-gray-500 focus:outline-none transition-all duration-200 text-gray-900 bg-white shadow-md hover:shadow-lg appearance-none cursor-pointer disabled:opacity-50 border-r-0"
+            className="h-[52px] px-4 py-3 text-sm border-2 border-gray-300 rounded-2xl focus-within:ring-2 ring-gray-400 focus:border-gray-500 focus:outline-none transition-all duration-200 text-gray-900 bg-white shadow-md hover:shadow-lg appearance-none cursor-pointer disabled:opacity-50"
             style={{ minWidth: '140px' }}
           >
             <option value="deep">Advanced Search</option>
@@ -53,7 +53,7 @@ export default function SearchBox({ onSearch, loading }: SearchBoxProps) {
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Search for coffee shops, study spots, restaurants, bars..."
-            className="w-full h-[52px] px-4 py-3 text-lg border-2 border-gray-300 rounded-r-2xl focus-within:ring-2 ring-gray-400 focus:border-gray-500 focus:outline-none transition-all duration-200 text-gray-900 shadow-md hover:shadow-lg border-l-0"
+            className="w-full h-[52px] px-4 py-3 text-lg border-2 border-gray-300 rounded-2xl focus-within:ring-2 ring-gray-400 focus:border-gray-500 focus:outline-none transition-all duration-200 text-gray-900 shadow-md hover:shadow-lg"
             disabled={loading}
           />
         </div>
