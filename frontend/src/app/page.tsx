@@ -105,12 +105,20 @@ export default function Home() {
           {/* AI Assistant Loading State */}
           {loading && (
             <div className="mb-6 animate-in fade-in duration-500">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  AI Response
-                </h3>
-                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify font-inter">
-                  <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse"></span>
+              <div className="space-y-4">
+                <div className="text-sm text-gray-500">
+                  Performing deep search across thousands of venues
+                  <span className="inline-block animate-pulse" style={{ animationDelay: '0.2s' }}>.</span>
+                  <span className="inline-block animate-pulse" style={{ animationDelay: '0.4s' }}>.</span>
+                  <span className="inline-block animate-pulse" style={{ animationDelay: '0.6s' }}>.</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    AI Response
+                  </h3>
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify font-inter">
+                    <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse"></span>
+                  </div>
                 </div>
               </div>
             </div>
