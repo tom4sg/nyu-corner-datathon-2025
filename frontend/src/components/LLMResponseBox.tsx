@@ -25,7 +25,7 @@ export default function LLMResponseBox({ llmResponse, query }: LLMResponseBoxPro
           setIsTyping(false);
           clearInterval(interval);
         }
-      }, 20); // Adjust speed as needed
+      }, 20);
 
       return () => clearInterval(interval);
     }
@@ -47,9 +47,7 @@ export default function LLMResponseBox({ llmResponse, query }: LLMResponseBoxPro
           </h3>
           <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify font-inter">
             {displayedText}
-            {isTyping && (
-              <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse"></span>
-            )}
+            <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse"></span>
           </div>
           <div className="mt-3 text-sm text-gray-500">
             Here&apos;s what matches your vibe for &quot;{query}&quot;
