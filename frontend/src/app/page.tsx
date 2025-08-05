@@ -112,12 +112,6 @@ export default function Home() {
                 <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify font-inter">
                   <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse"></span>
                 </div>
-                <div className="text-xs text-gray-400 mt-2">
-                  Thinking
-                  <span className="inline-block animate-pulse" style={{ animationDelay: '0.2s' }}>.</span>
-                  <span className="inline-block animate-pulse" style={{ animationDelay: '0.4s' }}>.</span>
-                  <span className="inline-block animate-pulse" style={{ animationDelay: '0.6s' }}>.</span>
-                </div>
               </div>
             </div>
           )}
