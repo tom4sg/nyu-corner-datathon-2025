@@ -112,9 +112,6 @@ export default function Home() {
                 <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify font-inter">
                   <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse"></span>
                 </div>
-                <div className="mt-3 text-sm text-gray-500">
-                  Analyzing your search...
-                </div>
               </div>
             </div>
           )}

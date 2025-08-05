@@ -39,12 +39,12 @@ export default function LLMResponseBox({ llmResponse, query }: LLMResponseBoxPro
         <h3 className="text-lg font-semibold text-gray-900">
           AI Assistant
         </h3>
-        <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify font-inter">
+        <div className="leading-relaxed text-gray-800 font-light whitespace-pre-wrap text-justify font-inter">
           {displayedText}
           <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse"></span>
         </div>
         <div className="text-sm text-gray-500">
-          Here&apos;s what matches your vibe for &quot;{query}&quot;
+          Based on your search for &quot;{query}&quot;
         </div>
       </div>
     </div>
