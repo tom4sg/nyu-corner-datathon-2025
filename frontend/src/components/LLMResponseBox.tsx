@@ -45,7 +45,7 @@ export default function LLMResponseBox({ llmResponse, query }: LLMResponseBoxPro
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             AI Assistant
           </h3>
-          <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+          <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify font-inter">
             {displayedText}
             {isTyping && (
               <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse"></span>
