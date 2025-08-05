@@ -50,7 +50,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 pt-10 pb-20">
+      <div className="max-w-3xl mx-auto px-4 pt-10 pb-20">
         {/* Header */}
         <div className="text-center mb-12 space-y-4">
           <div className="flex items-center justify-center gap-3 mb-4 w-full">
@@ -69,7 +69,7 @@ export default function Home() {
         </div>
 
         {/* Search Section */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           <SearchBox onSearch={handleSearch} loading={loading} />
           
           {/* Error Message */}
@@ -81,22 +81,24 @@ export default function Home() {
 
           {/* Results */}
           {places.length > 0 && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* LLM Response */}
               <LLMResponseBox 
                 llmResponse={llmResponse} 
                 query={query} 
               />
               
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-semibold text-gray-900">
-                  Search Results
-                </h2>
-                <span className="text-gray-600">
-                  {places.length} places found
-                </span>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-semibold text-gray-900">
+                    Search Results
+                  </h2>
+                  <span className="text-gray-600">
+                    {places.length} places found
+                  </span>
+                </div>
+                <ResultsList places={places} />
               </div>
-              <ResultsList places={places} />
             </div>
           )}
 
