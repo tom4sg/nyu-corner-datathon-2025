@@ -36,7 +36,7 @@ export default function LLMResponseBox({ llmResponse, query }: LLMResponseBoxPro
   return (
     <div className="mb-8 animate-in fade-in duration-500">
       <div className="space-y-4">
-        <h3 className="text-2xl font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-gray-900">
           AI Assistant
         </h3>
         <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify font-inter">

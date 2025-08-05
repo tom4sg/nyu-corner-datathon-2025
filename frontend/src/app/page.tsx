@@ -90,7 +90,7 @@ export default function Home() {
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-semibold text-gray-900">
+                  <h2 className="text-lg font-semibold text-gray-900">
                     Search Results
                   </h2>
                   <span className="text-gray-600">
