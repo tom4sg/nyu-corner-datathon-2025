@@ -103,8 +103,12 @@ export default function Home() {
           {/* Loading State */}
           {loading && (
             <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-              <p className="mt-2 text-gray-600">Performing deep search across thousands of venues...</p>
+              <p className="text-sm text-gray-500 mt-4 animate-pulse">
+                Performing deep search across thousands of venues
+                <span className="inline-block animate-bounce">.</span>
+                <span className="inline-block animate-bounce" style={{ animationDelay: '0.1s' }}>.</span>
+                <span className="inline-block animate-bounce" style={{ animationDelay: '0.2s' }}>.</span>
+              </p>
             </div>
           )}
 
