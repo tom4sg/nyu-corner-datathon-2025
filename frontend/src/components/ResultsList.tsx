@@ -37,7 +37,7 @@ export default function ResultsList({ places }: ResultsListProps) {
                 )}
                 
                 {place.description && (
-                  <p className="leading-relaxed text-gray-800 font-light font-inter">
+                  <p className="text-gray-600 leading-relaxed font-normal font-inter">
                     {place.description}
                   </p>
                 )}
