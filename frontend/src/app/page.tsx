@@ -13,7 +13,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
 
-  const handleSearch = async (searchQuery: string) => {
+  const handleSearch = async (searchQuery: string, mode: string = 'quick') => {
     setLoading(true);
     setError(null);
     setQuery(searchQuery);
@@ -30,7 +30,10 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query: searchQuery }),
+        body: JSON.stringify({ 
+          query: searchQuery,
+          mode: mode 
+        }),
       });
 
       if (!response.ok) {

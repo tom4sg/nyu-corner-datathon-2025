@@ -21,6 +21,7 @@ load_dotenv()
 
 class SearchRequest(BaseModel):
     query: str
+    mode: str
 
 class Place(BaseModel):
     place_id: str
@@ -119,7 +120,7 @@ def merge_matches(dense_result, sparse_result, image_result) -> List[Dict]:
 
     return formatted_results
 
-def format_place_strings(places: List[Dict]) -> List[str]:
+def format_place_strings_deep(places: List[Dict]) -> Dict[str, Dict]:
     rerank_map = {}
     for place in places:
         name = place.get("name", "Unknown")
@@ -130,6 +131,19 @@ def format_place_strings(places: List[Dict]) -> List[str]:
         key = f"{emoji} {name} ({neighborhood}) — {desc}"
         rerank_map[key] = place
     return rerank_map
+
+def format_place_strings_quick(places: List[Dict]) -> Dict[str, Dict]:
+    rerank_map = {}
+    for place in places.matches:
+        name = place["metadata"].get("name", "Unknown")
+        emoji = place["metadata"].get("emoji", "")
+        neighborhood = place["metadata"].get("neighborhood", "Unknown area")
+        desc = place["metadata"].get("description", "No description")
+
+        key = f"{emoji} {name} ({neighborhood}) — {desc}"
+        rerank_map[key] = place
+    return rerank_map
+
 
 # Define Async Pinecone query functions per index
 executor = ThreadPoolExecutor()
@@ -192,6 +206,20 @@ async def search_places(request: SearchRequest):
     try:
         query = request.query
 
+        if request.mode == "deep":
+            return await run_hybrid_search(query)
+        elif request.mode == "quick":
+            return await run_quick_search(query)
+        else:
+            raise HTTPException(status_code=400, detail=f"Invalid mode: {request.mode}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+
+async def run_hybrid_search(query: str):
+    """
+    Run the deep/hybrid search with CLIP, SPLADE, and dense embeddings
+    """
+    try:
         # Get CLIP (image) embedding
         inputs = processor(text=[query], return_tensors="pt", padding=True)
         clip_embedding = clip_model.get_text_features(**inputs)
@@ -215,7 +243,7 @@ async def search_places(request: SearchRequest):
 
         # Merge all results
         hybrid_results = merge_matches(dense_results, sparse_results, image_results)
-        formatted_results = format_place_strings(hybrid_results)
+        formatted_results = format_place_strings_deep(hybrid_results)
 
         # Rerank with BGE
         reranked = pc.inference.rerank(
@@ -262,10 +290,10 @@ async def search_places(request: SearchRequest):
             places.append(place)
         
         prompt = (f"Summarize the following results"
-          f"\nsearch_engine_results: {llm_input}"
-          f"\nas if you were responding to this query:{query}"
-          f"\nStart with something like 'I think you'd like the following:'"
-          f"\nOnly talk about the top 3 results"
+            f"\nsearch_engine_results: {llm_input}"
+            f"\nas if you were responding to this query:{query}"
+            f"\nStart with something like 'I think you'd like the following:'"
+            f"\nOnly talk about the top 3 results"
         )
 
         llm_response = llm.invoke(prompt)
@@ -278,7 +306,81 @@ async def search_places(request: SearchRequest):
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Deep Search failed: {str(e)}")
+    
+    
+
+async def run_quick_search(query: str):
+    """
+    Run quick search - placeholder for you to fill in
+    """
+    try:
+        dense_embedding = metadata_model.encode([query], normalize_embeddings=True)[0].astype('float32').tolist()
+        dense_q = await pinecone_dense_query(dense_embedding)
+        formatted_results = format_place_strings_quick(dense_q)
+
+        reranked = pc.inference.rerank(
+            model="bge-reranker-v2-m3",
+            query=query,
+            documents=list(formatted_results.keys()),
+            top_n=8,
+            return_documents=True,
+        )
+
+        # Add reranked score to places and format for LLM input
+        top_places = []
+        llm_input = ""
+
+        for doc in reranked.data:
+            key = doc.document.text
+            original_place = formatted_results[key]["metadata"].copy()
+            original_place["id"] = formatted_results[key]["id"]
+            original_place["score"] = round(doc.score, 6)
+            top_places.append(original_place)
+            reviews = ast.literal_eval(original_place["reviews"])
+            
+            llm_input += f"{key}\n reviews:\n\n"
+
+            for review in reviews[:3]:  # only first 3
+                llm_input += f"- {review}\n"
+
+            llm_input += "\n\n"
+        
+        # Transform into response model
+        places = []
+        for doc in top_places:
+            place = Place(
+                place_id=doc["id"],
+                name=doc["name"],
+                neighborhood=doc.get("neighborhood"),
+                latitude=None,
+                longitude=None,
+                tags=None,
+                description=doc.get("description"),
+                reviews=doc.get("reviews"),
+                emoji=doc.get("emoji"),
+                score=doc.get("score")
+            )
+            places.append(place)
+        
+        prompt = (f"Summarize the following results"
+            f"\nsearch_engine_results: {llm_input}"
+            f"\nas if you were responding to this query:{query}"
+            f"\nStart with something like 'I think you'd like the following:'"
+            f"\nOnly talk about the top 3 results"
+        )
+
+        llm_response = llm.invoke(prompt)
+
+        return SearchResponse(
+            llm_response=llm_response.content,
+            places=places,
+            total_results=len(places),
+            query=query
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Quick Search failed: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
