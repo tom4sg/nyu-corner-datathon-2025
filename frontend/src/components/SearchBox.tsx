@@ -32,7 +32,7 @@ export default function SearchBox({ onSearch, loading }: SearchBoxProps) {
             value={searchMode}
             onChange={(e) => setSearchMode(e.target.value)}
             disabled={loading}
-            className="h-[52px] px-4 py-3 text-sm rounded-full bg-transparent text-gray-600 hover:text-gray-800 hover:underline focus:outline-none transition-all duration-200 appearance-none cursor-pointer disabled:opacity-50"
+            className="h-[52px] px-4 py-3 pr-8 text-sm rounded-full border border-gray-300 bg-white text-gray-600 hover:text-gray-800 hover:shadow-md focus:outline-none transition-all duration-200 appearance-none cursor-pointer disabled:opacity-50 shadow-sm"
             style={{ minWidth: '140px' }}
           >
             <option value="deep">Advanced Search</option>
