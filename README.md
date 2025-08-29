@@ -141,7 +141,7 @@ Content-Type: application/json
 }
 ```
 
-### Health Check
+### Health
 ```http
 GET /health
 ```
@@ -161,7 +161,7 @@ The original datathon solution was implemented in Jupyter Notebook (`datathon.ip
 - RAG recommendation system for NYC venues
 - Hybrid dense and sparse search
 - Image-text understanding with CLIP
-- Advanced ranking algorithms
+- FAISS index for vector storage and retrieval
 
 ### Demo Video
 
