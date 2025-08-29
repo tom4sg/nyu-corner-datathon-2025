@@ -34,7 +34,7 @@ This project consists of:
 - **Vector DB**: Pinecone Dense and Sparse indices
 - **Deployment**: Railway (backend) + Vercel (frontend)
 
-## Setup
+## Local Setup
 
 ### Prerequisites
 - Python 3.8+
