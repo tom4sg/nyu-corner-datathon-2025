@@ -19,7 +19,7 @@ A full-stack web application that provides venue recommendations for NYC using R
 
 Visit [Vibio](https://www.vibio.space/) to use it yourself!
 
-## Architecture
+### Architecture
 
 This project consists of:
 
