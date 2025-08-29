@@ -34,7 +34,7 @@ This project consists of:
 - **Vector DB**: Pinecone Dense and Sparse indices
 - **Deployment**: Railway (backend) + Vercel (frontend)
 
-## Pseudocode: Hybrid Search Function
+### Pseudocode: Hybrid Search Function
 ```python3
 # 1. Generate embeddings
 clip_embedding   = clip_model.encode_text(query)       # CLIP (image/text)
