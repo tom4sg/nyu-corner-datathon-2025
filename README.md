@@ -34,7 +34,7 @@ This project consists of:
 - **Vector DB**: Pinecone Dense and Sparse indices
 - **Deployment**: Railway (backend) + Vercel (frontend)
 
-### Pseudo Hybrid Search Logic
+### Pseudo-Search Logic
 
 ```python
 # Example of the hybrid search process
