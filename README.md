@@ -19,7 +19,7 @@ A full-stack web application that provides venue recommendations for NYC using R
 
 Visit [Vibio](https://www.vibio.space/) to use it yourself!
 
-### Architecture
+## Overview
 
 This project consists of:
 
@@ -33,6 +33,8 @@ This project consists of:
 - **LLM Output**: Claude 3.5 Sonnet for natural language
 - **Vector DB**: Pinecone Dense and Sparse indices
 - **Deployment**: Railway (backend) + Vercel (frontend)
+
+## Setup
 
 ### Prerequisites
 - Python 3.8+
@@ -85,15 +87,9 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 npm run dev
 ```
 
-###  How It Works
+##  How It Works
 
-### Hybrid Search Architecture
-
-1. **Dense Search**: Uses sentence transformers to capture semantic meaning
-2. **Sparse Search**: Uses SPLADE to capture specific keywords and phrases  
-3. **Image Search**: Uses CLIP to understand visual context from venue images
-
-### Search Process
+### Hybrid Search Function
 
 ```python
 # Example of the hybrid search process
@@ -115,7 +111,7 @@ final_results = rerank(merge_results(image_results, dense_results, sparse_result
 
 ## API Endpoints
 
-### Search Places
+### Search
 ```http
 POST /search
 Content-Type: application/json
@@ -150,7 +146,7 @@ Content-Type: application/json
 GET /health
 ```
 
-### Deployment
+## Deployment
 
 ### Backend (Railway)
 The backend is automatically deployed to Railway with the configuration in `railway.json`.
@@ -166,9 +162,6 @@ The original datathon solution was implemented in Jupyter Notebook (`datathon.ip
 - Hybrid dense and sparse search
 - Image-text understanding with CLIP
 - Advanced ranking algorithms
-
-This web application brings that solution to life with a production-ready interface.
-
 ---
 
 ## Demo Video
