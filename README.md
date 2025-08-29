@@ -42,9 +42,9 @@ This project consists of:
 - Pinecone API key
 - Anthropic API key
 
-### Backend Setup
+### Backend
 
-1. **Clone and navigate to backend:**
+1. **Navigate to backend:**
 ```bash
 cd backend
 ```
@@ -65,7 +65,7 @@ PERSONAL_ANTHROPIC=your_anthropic_api_key
 uvicorn main:app --reload
 ```
 
-### Frontend Setup
+### Frontend
 
 1. **Navigate to frontend:**
 ```bash
@@ -87,7 +87,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 npm run dev
 ```
 
-##  How It Works
+##  How Does it Actually Work?
 
 ### Hybrid Search Function
 
