@@ -38,6 +38,7 @@ This project consists of:
 - Python 3.8+
 - Node.js 18+
 - Pinecone API key
+- Anthropic API key
 
 ### Backend Setup
 
