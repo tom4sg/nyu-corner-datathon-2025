@@ -87,7 +87,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 npm run dev
 ```
 
-##  How Does it Actually Work?
+##  Search logic
 
 ### Hybrid Search Function
 
