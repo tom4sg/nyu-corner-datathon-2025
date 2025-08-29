@@ -149,26 +149,6 @@ Content-Type: application/json
 ```http
 GET /health
 ```
-##  Project Structure
-
-```
-corner-datathon/
-├── backend/
-│   ├── main.py              # FastAPI application with LLM integration
-│   ├── requirements.txt     # Python dependencies
-│   └── Procfile            # Railway deployment config
-├── frontend/
-│   ├── src/
-│   │   ├── app/            # Next.js app directory
-│   │   ├── components/     # React components (including LLMResponseBox)
-│   │   └── types/          # TypeScript definitions
-│   ├── public/             # Static assets (SVGs, etc.)
-│   ├── package.json        # Node.js dependencies
-│   └── next.config.ts      # Next.js configuration
-├── datasets/               # Data files
-├── datathon.ipynb         # Original Jupyter notebook
-└── README.md              # This file
-```
 
 ## Deployment
 
