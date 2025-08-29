@@ -113,8 +113,6 @@ npm run dev
 
 ### Hybrid Search Architecture
 
-The system uses a sophisticated three-tier search approach:
-
 1. **Dense Search**: Uses sentence transformers to capture semantic meaning
 2. **Sparse Search**: Uses SPLADE to capture specific keywords and phrases  
 3. **Image Search**: Uses CLIP to understand visual context from venue images
