@@ -109,7 +109,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 npm run dev
 ```
 
-## 🔍 How It Works
+##  How It Works
 
 ### Hybrid Search Architecture
 
@@ -175,17 +175,7 @@ Content-Type: application/json
 ```http
 GET /health
 ```
-
-## Features
-
-- **Natural Language Search**: Search using conversational queries
-- **Multi-modal Understanding**: Combines text, image, and metadata analysis
-- **Intelligent Ranking**: Advanced reranking using BGE model
-- **AI-Powered Summaries**: LLM-generated responses that summarize the best spots
-- **Real-time Results**: Fast search with sub-second response times
-- **Modern UI**: Clean, responsive interface built with Next.js and Tailwind
-
-## 📁 Project Structure
+##  Project Structure
 
 ```
 corner-datathon/
