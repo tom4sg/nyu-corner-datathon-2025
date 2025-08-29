@@ -31,7 +31,7 @@ This project consists of:
   - SPLADE for sparse embeddings
   - BGE Reranker for final ranking against user query
 - **LLM Output**: Claude 3.5 Sonnet for natural language
-- **Vector DB**: Pinecone Dense and Sparse indices
+- **Vector DB**: Dense and Sparse Pinecone indices
 - **Deployment**: Railway (backend) + Vercel (frontend)
 
 ### Pseudocode: Hybrid Search Function
