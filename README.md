@@ -87,28 +87,6 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 npm run dev
 ```
 
-##  Search logic
-
-### Hybrid Search Function
-
-```python
-# Example of the hybrid search process
-query = "romantic dinner with city views"
-
-# 1. Generate embeddings for all three modalities
-clip_embedding = clip_model.encode_text(query)
-dense_embedding = metadata_model.encode(query)
-sparse_embedding = sparse_model.encode(query)
-
-# 2. Search across all indices
-image_results = image_index.query(clip_embedding)
-dense_results = dense_index.query(dense_embedding)
-sparse_results = sparse_index.query(sparse_embedding)
-
-# 3. Merge and rerank results
-final_results = rerank(merge_results(image_results, dense_results, sparse_results))
-```
-
 ## API Endpoints
 
 ### Search
@@ -153,6 +131,28 @@ GET /health
   "message": "API is running"
 }
 ```
+
+### Pseudo-Search Logic
+
+```python
+# Example of the hybrid search process
+query = "romantic dinner with city views"
+
+# 1. Generate embeddings for all three modalities
+clip_embedding = clip_model.encode_text(query)
+dense_embedding = metadata_model.encode(query)
+sparse_embedding = sparse_model.encode(query)
+
+# 2. Search across all indices
+image_results = image_index.query(clip_embedding)
+dense_results = dense_index.query(dense_embedding)
+sparse_results = sparse_index.query(sparse_embedding)
+
+# 3. Merge and rerank results
+final_results = rerank(merge_results(image_results, dense_results, sparse_results))
+```
+
+
 ## Deployment
 
 ### Backend (Railway)
