@@ -29,7 +29,7 @@ This project consists of:
   - CLIP for image-text embeddings
   - Sentence Transformers for dense embeddings
   - SPLADE for sparse embeddings
-  - BGE Reranker for final ranking
+  - BGE Reranker for final ranking against user query
 - **LLM Integration**: Claude 3.5 Sonnet for natural language
 - **Vector DB**: Pinecone Dense and Sparse indices
 - **Deployment**: Railway (backend) + Vercel (frontend)
