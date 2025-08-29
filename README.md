@@ -85,7 +85,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 npm run dev
 ```
 
-##  How It Works
+###  How It Works
 
 ### Hybrid Search Architecture
 
@@ -150,7 +150,7 @@ Content-Type: application/json
 GET /health
 ```
 
-## Deployment
+### Deployment
 
 ### Backend (Railway)
 The backend is automatically deployed to Railway with the configuration in `railway.json`.
