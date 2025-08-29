@@ -26,12 +26,12 @@ This project consists of:
 - **Frontend**: Next.js 15 with TypeScript and Tailwind CSS
 - **Backend**: FastAPI with Python
 - **Embedding and Reranking**: 
-  - CLIP for image-text understanding
+  - CLIP for image-text embeddings
   - Sentence Transformers for dense embeddings
   - SPLADE for sparse embeddings
   - BGE Reranker for final ranking
-- **LLM Integration**: Claude 3.5 Sonnet for intelligent response generation
-- **Vector Database**: Pinecone for efficient similarity search
+- **LLM Integration**: Claude 3.5 Sonnet for natural language
+- **Vector DB**: Pinecone Dense and Sparse indices
 - **Deployment**: Railway (backend) + Vercel (frontend)
 
 ## Tech Stack
