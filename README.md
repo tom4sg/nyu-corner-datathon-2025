@@ -34,6 +34,35 @@ This project consists of:
 - **Vector DB**: Pinecone Dense and Sparse indices
 - **Deployment**: Railway (backend) + Vercel (frontend)
 
+## Pseudocode: Hybrid Search Function
+```python3
+# 1. Generate embeddings
+clip_embedding   = clip_model.encode_text(query)       # CLIP (image/text)
+sparse_embedding = sparse_model.embed(query)           # SPLADE (sparse)
+dense_embedding  = metadata_model.encode(query)        # SentenceTransformer (dense)
+
+# 2. Query Pinecone indexes (async)
+image_q  = pinecone_image_query(clip_embedding)
+sparse_q = pinecone_sparse_query(sparse_embedding)
+dense_q  = pinecone_dense_query(dense_embedding)
+
+image_results, sparse_results, dense_results = await asyncio.gather(
+    image_q, sparse_q, dense_q
+)
+
+# 3. Merge hybrid search results
+hybrid_results = merge_matches(dense_results, sparse_results, image_results)
+
+# 4. Rerank with BGE
+reranked = pc.inference.rerank(
+    model="bge-reranker-v2-m3",
+    query=query,
+    documents=list(hybrid_results.keys()),
+    top_n=8
+)
+```
+
+
 ## Local Setup
 
 ### Prerequisites
