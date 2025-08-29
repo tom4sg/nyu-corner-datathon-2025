@@ -146,6 +146,13 @@ Content-Type: application/json
 GET /health
 ```
 
+**Response:**
+```json
+{
+  "status": "healthy",
+  "message": "API is running"
+}
+```
 ## Deployment
 
 ### Backend (Railway)
