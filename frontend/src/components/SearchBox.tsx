@@ -52,7 +52,7 @@ export default function SearchBox({ onSearch, loading }: SearchBoxProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Search for coffee shops, study spots, restaurants, bars..."
+            placeholder="Search places"
             className="w-full h-[52px] px-4 py-3 text-lg border-2 border-gray-300 rounded-2xl focus-within:ring-2 ring-gray-400 focus:border-gray-500 focus:outline-none transition-all duration-200 text-gray-900 shadow-md hover:shadow-lg"
             disabled={loading}
           />
