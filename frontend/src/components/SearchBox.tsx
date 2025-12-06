@@ -73,23 +73,6 @@ export default function SearchBox({ onSearch, loading }: SearchBoxProps) {
           )}
         </button>
       </div>
-      
-      {/* Search suggestions */}
-      <div className="mt-4 flex flex-wrap gap-2 overflow-x-auto whitespace-nowrap">
-        {['coffee shops', 'study spots', 'restaurants', 'bars', 'libraries'].map((suggestion) => (
-          <button
-            key={suggestion}
-            onClick={() => {
-              setQuery(suggestion);
-              onSearch(suggestion, searchMode);
-            }}
-            disabled={loading}
-            className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-full transition-colors disabled:opacity-50 whitespace-nowrap"
-          >
-            {suggestion}
-          </button>
-        ))}
-      </div>
     </div>
   );
 } 
