@@ -41,7 +41,19 @@ export default function LLMResponseBox({ llmResponse, query }: LLMResponseBoxPro
           AI Response
         </h3>
         <div className="text-gray-700 leading-relaxed text-justify font-inter [&_p]:mb-4 [&_p:last-child]:mb-0">
-          <ReactMarkdown>
+          <ReactMarkdown
+            components={{
+              strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+              em: ({ children }) => <em className="italic">{children}</em>,
+              code: ({ children }) => <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono">{children}</code>,
+              h1: ({ children }) => <h1 className="text-2xl font-bold mt-4 mb-2">{children}</h1>,
+              h2: ({ children }) => <h2 className="text-xl font-bold mt-3 mb-2">{children}</h2>,
+              h3: ({ children }) => <h3 className="text-lg font-semibold mt-2 mb-1">{children}</h3>,
+              ul: ({ children }) => <ul className="list-disc list-inside mb-4 space-y-1">{children}</ul>,
+              ol: ({ children }) => <ol className="list-decimal list-inside mb-4 space-y-1">{children}</ol>,
+              li: ({ children }) => <li className="ml-4">{children}</li>,
+            }}
+          >
             {displayedText}
           </ReactMarkdown>
           {isTyping && (
@@ -54,4 +66,4 @@ export default function LLMResponseBox({ llmResponse, query }: LLMResponseBoxPro
       </div>
     </div>
   );
-} 
+}
