@@ -40,7 +40,7 @@ export default function LLMResponseBox({ llmResponse, query }: LLMResponseBoxPro
         <h3 className="text-lg font-semibold text-gray-900">
           AI Response
         </h3>
-        <div className="text-gray-700 leading-relaxed text-justify font-inter">
+        <div className="text-gray-700 leading-relaxed text-justify font-inter [&_p]:mb-4 [&_p:last-child]:mb-0">
           <ReactMarkdown>
             {displayedText}
           </ReactMarkdown>
