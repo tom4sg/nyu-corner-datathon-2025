@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface LLMResponseBoxProps {
   llmResponse: string;
@@ -39,9 +40,13 @@ export default function LLMResponseBox({ llmResponse, query }: LLMResponseBoxPro
         <h3 className="text-lg font-semibold text-gray-900">
           AI Response
         </h3>
-        <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify font-inter">
-          {displayedText}
-          <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse"></span>
+        <div className="text-gray-700 leading-relaxed text-justify font-inter">
+          <ReactMarkdown>
+            {displayedText}
+          </ReactMarkdown>
+          {isTyping && (
+            <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse" />
+          )}
         </div>
         <div className="text-sm text-gray-500">
           Based on your search for &quot;{query}&quot;
