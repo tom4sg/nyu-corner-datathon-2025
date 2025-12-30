@@ -52,12 +52,17 @@ export default function LLMResponseBox({ llmResponse, query }: LLMResponseBoxPro
               ul: ({ children }) => <ul className="list-disc list-inside mb-4 space-y-1">{children}</ul>,
               ol: ({ children }) => <ol className="list-decimal list-inside mb-4 space-y-1">{children}</ol>,
               li: ({ children }) => <li className="ml-4">{children}</li>,
+              p: ({ children, ...props }) => (
+                <p {...props}>
+                  {children}
+                </p>
+              ),
             }}
           >
             {displayedText}
           </ReactMarkdown>
           {isTyping && (
-            <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse" />
+            <span className="inline-block w-0.5 h-4 bg-indigo-500 ml-0.5 animate-pulse" />
           )}
         </div>
         <div className="text-sm text-gray-500">
