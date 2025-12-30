@@ -61,9 +61,6 @@ export default function LLMResponseBox({ llmResponse, query }: LLMResponseBoxPro
           >
             {displayedText}
           </ReactMarkdown>
-          {isTyping && (
-            <span className="inline-block w-0.5 h-4 bg-indigo-500 ml-0.5 animate-pulse" />
-          )}
         </div>
         <div className="text-sm text-gray-500">
           Based on your search for &quot;{query}&quot;
