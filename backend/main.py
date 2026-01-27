@@ -222,7 +222,18 @@ async def run_hybrid_search(query: str):
     try:
         # Get CLIP (image) embedding
         inputs = processor(text=[query], return_tensors="pt", padding=True)
-        clip_embedding = clip_model.get_text_features(**inputs)
+        clip_output = clip_model.get_text_features(**inputs)
+        
+        # Extract tensor from output if it's a BaseModelOutputWithPooling object
+        if hasattr(clip_output, 'pooler_output') and clip_output.pooler_output is not None:
+            clip_embedding = clip_output.pooler_output
+        elif hasattr(clip_output, 'last_hidden_state'):
+            # Use mean pooling if we only have last_hidden_state
+            clip_embedding = clip_output.last_hidden_state.mean(dim=1)
+        else:
+            # Assume it's already a tensor (older behavior)
+            clip_embedding = clip_output
+        
         clip_embedding = clip_embedding / clip_embedding.norm(p=2, dim=-1, keepdim=True)
         clip_embedding = clip_embedding.detach().cpu().numpy().astype('float32').flatten().tolist()
 
