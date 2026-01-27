@@ -44,7 +44,7 @@ class SearchResponse(BaseModel):
 # Let's load the LLM with LangChain
 
 llm = ChatAnthropic(
-    model="claude-3-7-sonnet-20250219",
+    model="claude-sonnet-4-5-20250929",
     anthropic_api_key=os.getenv("PERSONAL_ANTHROPIC")
 )
 
