@@ -14,6 +14,9 @@ from concurrent.futures import ThreadPoolExecutor
 import ast
 import re
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 # Load environment variables
 load_dotenv()
 
@@ -70,21 +73,41 @@ app.add_middleware(
 # Get access to the specific indices in pinecone
 try:
     pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+
+    logging.info("Image index initializing...")
     image_index = pc.Index("corner-clip")
+    
+    logging.info("Dense index initializing...")
     dense_index = pc.Index("corner-metadata-dense")
+    
+    logging.info("Sparse index initializing...")
     sparse_index = pc.Index("corner-metadata-sparse")
-except Exception as e:
-    print(f"Warning: Could not initialize Pinecone: {e}")
+    
+    logging.info("All indexes initialized.")
+    
+except Exception:
+    logging.exception("Could not initialize Pinecone")
+    raise
 
 # Load the models
 try:
+    logging.info("Loading CLIP processor...")
     processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
-    clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
-    metadata_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-    sparse_model = SparseTextEmbedding(model_name="prithivida/Splade_PP_en_v1")
-except Exception as e:
-    print(f"Warning: Could not load models: {e}")
 
+    logging.info("Loading CLIP model...")
+    clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+
+    logging.info("Loading dense model...")
+    metadata_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
+    logging.info("Loading sparse model...")
+    sparse_model = SparseTextEmbedding(model_name="prithivida/Splade_PP_en_v1")
+
+    logging.info("All models loaded.")
+
+except Exception:
+    logging.exception("Could not load models")
+    raise
 
 
 def merge_matches(dense_result, sparse_result, image_result) -> List[Dict]:
