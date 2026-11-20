@@ -18,6 +18,7 @@ export function PlacePhoto({
   scale = 1,
   baseSize = DEFAULT_SIZE,
   holdSize = false,
+  fillHeight = false,
 }: {
   urls?: string[];
   name: string;
@@ -26,6 +27,7 @@ export function PlacePhoto({
   scale?: number;
   baseSize?: number;
   holdSize?: boolean;
+  fillHeight?: boolean;
 }) {
   const photos = (urls || []).filter((url) => url.startsWith('https://'));
   const photoKey = photos.join('|');
@@ -91,13 +93,20 @@ export function PlacePhoto({
           setFailed(true);
         }
       }}
-      style={{ width: size, height: size }}
-      className="rounded-lg bg-gray-100 object-cover dark:bg-white/10"
+      style={fillHeight ? undefined : { width: size, height: size }}
+      className={
+        fillHeight
+          ? 'h-full w-full bg-gray-100 object-cover dark:bg-white/10'
+          : 'rounded-lg bg-gray-100 object-cover dark:bg-white/10'
+      }
     />
   );
 
   return (
-    <div className="group relative shrink-0">
+    <div
+      className={fillHeight ? 'group relative shrink-0 self-stretch overflow-hidden rounded-lg' : 'group relative shrink-0'}
+      style={fillHeight ? { width: size, minHeight: size } : undefined}
+    >
       {href ? (
         <a
           href={href}
@@ -105,10 +114,12 @@ export function PlacePhoto({
           rel="noopener noreferrer"
           aria-label={`Open ${name}`}
           onClick={(event) => event.stopPropagation()}
-          className="block"
+          className={fillHeight ? 'absolute inset-0 block' : 'block'}
         >
           {image}
         </a>
+      ) : fillHeight ? (
+        <div className="absolute inset-0">{image}</div>
       ) : (
         image
       )}
@@ -122,7 +133,7 @@ export function PlacePhoto({
           event.stopPropagation();
           setDragSize(null);
         }}
-        className="absolute -bottom-1 -right-1 h-4 w-4 cursor-nwse-resize touch-none rounded-sm border border-gray-300 bg-white/90 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 focus:opacity-100 dark:border-white/20 dark:bg-[#2c2c2e]"
+        className="absolute bottom-0 right-0 h-6 w-6 cursor-nwse-resize touch-none bg-transparent"
       />
     </div>
   );

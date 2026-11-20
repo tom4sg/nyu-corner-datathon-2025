@@ -52,6 +52,9 @@ class Place(BaseModel):
     google_rating: Optional[float] = None
     google_review_count: Optional[int] = None
     phone: Optional[str] = None
+    website: Optional[str] = None
+    hours_today: Optional[str] = None
+    open_now: Optional[bool] = None
 
 class SearchResponse(BaseModel):
     llm_response: str

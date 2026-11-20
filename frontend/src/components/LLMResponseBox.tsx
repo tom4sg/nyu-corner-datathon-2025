@@ -81,6 +81,22 @@ function ExpandableText({
   );
 }
 
+function HoursToday({ hours, openNow }: { hours?: string; openNow?: boolean | null }) {
+  const today = hours?.trim();
+  if (!today && openNow == null) return null;
+  const closedToday = today?.toLowerCase() === 'closed';
+  const status = openNow === true ? 'Open' : openNow === false ? 'Closed' : null;
+  const statusAlreadyInHours = Boolean(status && today && today.toLowerCase().startsWith(status.toLowerCase()));
+  const showStatus = Boolean(status) && !closedToday && !statusAlreadyInHours;
+  return (
+    <span className="text-sm text-gray-500 dark:text-gray-400">
+      {showStatus && <span className="text-gray-700 dark:text-gray-300">{status}</span>}
+      {showStatus && today ? ' · ' : null}
+      {closedToday ? 'Closed' : today}
+    </span>
+  );
+}
+
 function BlurbWithPhoto({
   text,
   complete,
@@ -92,13 +108,15 @@ function BlurbWithPhoto({
 }) {
   const textRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
+  const phone = place.phone?.trim();
+  const showFooter = Boolean(phone || place.maps_url);
 
   useEffect(() => {
     setExpanded(false);
   }, [place.place_id]);
 
   return (
-    <div className="mt-3 flex items-start gap-3">
+    <div className="mt-3 flex items-stretch gap-3">
       <PlacePhoto
         urls={place.image_urls}
         name={place.name}
@@ -106,9 +124,34 @@ function BlurbWithPhoto({
         fitTo={textRef}
         scale={1.75}
         holdSize={expanded}
+        fillHeight
       />
-      <div ref={textRef} className="min-w-0 flex-1">
-        <ExpandableText text={text} complete={complete} expanded={expanded} setExpanded={setExpanded} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div ref={textRef}>
+          <ExpandableText text={text} complete={complete} expanded={expanded} setExpanded={setExpanded} />
+        </div>
+        {showFooter && (
+          <div className="mt-auto flex flex-wrap items-baseline gap-x-3 gap-y-1 pt-2">
+            {phone && (
+              <a
+                href={`tel:${phone.replace(/[^\d+]/g, '')}`}
+                className="text-sm text-gray-900 underline underline-offset-2 dark:text-gray-100"
+              >
+                {phone}
+              </a>
+            )}
+            {place.maps_url && (
+              <a
+                href={place.maps_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gray-900 underline underline-offset-2 dark:text-gray-100"
+              >
+                Google Maps
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -215,13 +258,14 @@ export default function LLMResponseBox({
             {picks.map(({ pick, place }, index) => {
               const shown = sliceAt(index + 1);
               if (shown === null) return null;
+              const nameHref = place.website?.trim() || place.maps_url;
               return (
                 <section key={place.place_id} className="fade-up border-t border-gray-200 pt-5 dark:border-white/10">
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                     <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                      {place.maps_url ? (
+                      {nameHref ? (
                         <a
-                          href={place.maps_url}
+                          href={nameHref}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="hover:underline"
@@ -236,18 +280,9 @@ export default function LLMResponseBox({
                       <span className="text-sm text-gray-500 dark:text-gray-400">{place.neighborhood}</span>
                     )}
                     <GoogleRating rating={place.google_rating} count={place.google_review_count} />
+                    <HoursToday hours={place.hours_today} openNow={place.open_now} />
                   </div>
                   <BlurbWithPhoto text={shown} complete={shown.length === pick.blurb.length} place={place} />
-                  {place.phone?.trim() && (
-                    <div className="mt-3 flex justify-end">
-                      <a
-                        href={`tel:${place.phone.replace(/[^\d+]/g, '')}`}
-                        className="text-sm text-gray-900 underline underline-offset-2 dark:text-gray-100"
-                      >
-                        {place.phone.trim()}
-                      </a>
-                    </div>
-                  )}
                 </section>
               );
             })}

@@ -16,6 +16,9 @@ export interface Place {
   google_rating?: number;
   google_review_count?: number;
   phone?: string;
+  website?: string;
+  hours_today?: string;
+  open_now?: boolean | null;
 }
 
 export interface Recommendation {

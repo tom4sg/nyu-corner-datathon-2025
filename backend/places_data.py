@@ -226,10 +226,16 @@ def google_rating_for(place_id: str) -> dict:
     record = _GOOGLE_RATINGS.get(place_id) or {}
     rating = record.get("rating")
     count = record.get("review_count")
+    website = record.get("website")
+    hours = record.get("hours")
+    open_now = record.get("open_now")
     return {
         "google_rating": float(rating) if isinstance(rating, (int, float)) else None,
         "google_review_count": int(count) if isinstance(count, int) else None,
         "phone": record.get("phone") or None,
+        "website": website.strip() if isinstance(website, str) and website.strip() else None,
+        "hours_today": hours.strip() if isinstance(hours, str) and hours.strip() else None,
+        "open_now": open_now if isinstance(open_now, bool) else None,
         "google_place_id": record.get("google_place_id") or None,
     }
 
