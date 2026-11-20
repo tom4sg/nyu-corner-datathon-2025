@@ -7,8 +7,16 @@ export interface Place {
   tags?: string[];
   description?: string;
   reviews?: string;
+  review_snippet?: string;
   emoji?: string;
   score: number;
+  image_urls?: string[];
+  maps_url?: string;
+}
+
+export interface Recommendation {
+  place_id: string;
+  blurb: string;
 }
 
 export interface SearchResponse {
@@ -16,4 +24,7 @@ export interface SearchResponse {
   total_results: number;
   query: string;
   llm_response: string;
-} 
+  intro?: string;
+  outro?: string;
+  recommendations?: Recommendation[];
+}

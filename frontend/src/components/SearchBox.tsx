@@ -23,54 +23,65 @@ export default function SearchBox({ onSearch, loading }: SearchBoxProps) {
     }
   };
 
+  const canSubmit = Boolean(query.trim()) && !loading;
+
   return (
-    <div className="flex gap-1">
-      {/* Search Mode Dropdown */}
-      <div className="relative">
+    <div className="flex h-12 items-center rounded-full border border-black/[0.08] bg-white pl-4 pr-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-16px_rgba(0,0,0,0.18)] transition-[box-shadow,border-color] duration-300 focus-within:border-black/[0.14] focus-within:shadow-[0_1px_2px_rgba(0,0,0,0.05),0_16px_40px_-16px_rgba(0,0,0,0.26)]">
+      <svg aria-hidden className="h-4 w-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7" strokeWidth={1.75} />
+        <path strokeLinecap="round" strokeWidth={1.75} d="M20 20l-3.5-3.5" />
+      </svg>
+
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyPress={handleKeyPress}
+        placeholder="Describe a vibe"
+        aria-label="Search places"
+        className="h-full min-w-0 flex-1 bg-transparent px-3 text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none"
+        disabled={loading}
+      />
+
+      <div className="relative shrink-0">
         <select
+          aria-label="Search mode"
           value={searchMode}
           onChange={(e) => setSearchMode(e.target.value)}
           disabled={loading}
-          className="h-[52px] px-4 py-3 pr-8 text-sm border-2 border-gray-300 rounded-2xl focus-within:ring-2 ring-gray-400 focus:border-gray-500 focus:outline-none transition-all duration-200 text-gray-900 bg-white shadow-md hover:shadow-lg appearance-none cursor-pointer disabled:opacity-50"
-          style={{ minWidth: '140px' }}
+          className="cursor-pointer appearance-none rounded-full bg-transparent py-1.5 pl-3 pr-6 text-xs text-gray-400 transition-colors hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-200 disabled:opacity-50"
         >
-          <option value="deep">Advanced Search</option>
-          <option value="quick">Quick Search</option>
+          <option value="quick">Quick</option>
+          <option value="deep">Advanced</option>
         </select>
-        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
+        <svg
+          aria-hidden
+          className="pointer-events-none absolute right-2 top-1/2 h-2.5 w-2.5 -translate-y-1/2 text-gray-300"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+        </svg>
       </div>
 
-      {/* Search Input */}
-      <div className="flex-1">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Search places"
-          className="w-full h-[52px] px-4 py-3 text-lg border-2 border-gray-300 rounded-2xl focus-within:ring-2 ring-gray-400 focus:border-gray-500 focus:outline-none transition-all duration-200 text-gray-900 shadow-md hover:shadow-lg"
-          disabled={loading}
-        />
-      </div>
-
-      {/* Search Button */}
       <button
+        type="button"
+        aria-label="Search"
         onClick={handleSubmit}
-        disabled={!query.trim() || loading}
-        className="h-[52px] px-4 py-3 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center"
+        disabled={!canSubmit}
+        className={`ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
+          canSubmit || loading ? 'bg-gray-900 text-white hover:bg-gray-700' : 'bg-gray-100 text-gray-400'
+        } disabled:cursor-default`}
       >
         {loading ? (
-          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          <span className="h-3.5 w-3.5 animate-spin rounded-full border-[1.5px] border-white border-t-transparent" />
         ) : (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7V17" />
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M13 6l6 6-6 6" />
           </svg>
         )}
       </button>
     </div>
   );
-} 
+}

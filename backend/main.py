@@ -3,7 +3,15 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from places_data import (
+    Recommendation,
+    build_place_fields,
+    markdown_response,
+    message_text,
+    review_snippet,
+    split_recommendations,
+)
 from transformers import CLIPProcessor, CLIPModel
 from sentence_transformers import SentenceTransformer
 from fastembed import SparseTextEmbedding
@@ -12,7 +20,6 @@ from langchain_anthropic import ChatAnthropic
 from typing import List, Optional, Dict, Any
 from concurrent.futures import ThreadPoolExecutor
 import ast
-import re
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -35,11 +42,17 @@ class Place(BaseModel):
     tags: Optional[List[str]] = None
     description: Optional[str] = None
     reviews: Optional[str] = None
+    review_snippet: Optional[str] = None
     emoji: Optional[str] = None
     score: float
+    image_urls: List[str] = Field(default_factory=list)
+    maps_url: Optional[str] = None
 
 class SearchResponse(BaseModel):
     llm_response: str
+    intro: Optional[str] = None
+    outro: Optional[str] = None
+    recommendations: List[Recommendation] = Field(default_factory=list)
     places: List[Place]
     total_results: int
     query: str
@@ -141,6 +154,9 @@ def merge_matches(dense_result, sparse_result, image_result) -> List[Dict]:
             "description": meta.get("description"),
             "reviews": meta.get("reviews"),
             "emoji": meta.get("emoji"),
+            "latitude": meta.get("latitude"),
+            "longitude": meta.get("longitude"),
+            "tags": meta.get("tags"),
             "score": match["score"]
         })
 
@@ -241,6 +257,78 @@ async def search_places(request: SearchRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
+def place_from_doc(doc: dict, query: str) -> Place:
+    fields = build_place_fields(doc)
+    snippet = review_snippet(review_lines(fields.get("reviews")), query)
+    return Place(**fields, review_snippet=snippet)
+
+
+def review_lines(raw) -> List[str]:
+    if not raw:
+        return []
+    if isinstance(raw, list):
+        return [str(review) for review in raw]
+    try:
+        parsed = ast.literal_eval(raw)
+    except (ValueError, SyntaxError):
+        return []
+    if isinstance(parsed, list):
+        return [str(review) for review in parsed]
+    return []
+
+
+async def summarize_places(query: str, top_places: List[dict]):
+    llm_input = ""
+    for place in top_places:
+        name = place.get("name", "Unknown")
+        emoji = place.get("emoji", "")
+        neighborhood = place.get("neighborhood", "Unknown area")
+        desc = place.get("description", "No description")
+        llm_input += f"{emoji} {name} ({neighborhood}) — {desc}\n reviews:\n\n"
+
+        for review in review_lines(place.get("reviews"))[:3]:  # only first 3
+            llm_input += f"- {review}\n"
+
+        llm_input += "\n\n"
+
+    prompt = (f"Summarize the following results"
+        f"\nsearch_engine_results: {llm_input}"
+        f"\nas if you were responding to this query:{query}"
+        f"\nStart with something like 'I think you'd like the following:'"
+        f"\nOnly talk about the top 3 results"
+        f"\nBegin the part about each place on its own line with just the place's name in double square brackets, like [[Name]]"
+        f"\nIf you add any closing remarks, put them after a final [[end]]"
+    )
+
+    message = await asyncio.get_event_loop().run_in_executor(executor, lambda: llm.invoke(prompt))
+    content = message_text(message)
+    intro, picks, outro = split_recommendations(content, top_places)
+    if not picks:
+        logging.warning("Could not split the LLM response by place")
+        return content, content, [], ""
+    if not intro:
+        intro = "I think you'd like the following:"
+    names = {place.get("id"): place.get("name") or place.get("id") for place in top_places}
+    recommendations = [Recommendation(**pick) for pick in picks]
+    return intro, markdown_response(intro, picks, names, outro), recommendations, outro
+
+
+async def respond_with_places(query: str, top_places: List[dict]) -> SearchResponse:
+    places = [place_from_doc(doc, query) for doc in top_places]
+    intro, llm_text, recommendations, outro = await summarize_places(query, top_places)
+
+    shown_intro = None if not recommendations else intro
+    return SearchResponse(
+        llm_response=llm_text,
+        intro=shown_intro,
+        outro=outro or None,
+        recommendations=recommendations,
+        places=places,
+        total_results=len(places),
+        query=query,
+    )
+
+
 async def run_hybrid_search(query: str):
     """
     Run the deep/hybrid search with CLIP, SPLADE, and dense embeddings
@@ -291,56 +379,14 @@ async def run_hybrid_search(query: str):
             return_documents=True,
         )
 
-        # Add reranked score to places and format for LLM input
         top_places = []
-        llm_input = ""
-
         for doc in reranked.data:
             key = doc.document.text
             original_place = formatted_results[key].copy()
             original_place["score"] = round(doc.score, 6)
             top_places.append(original_place)
-            reviews = ast.literal_eval(original_place["reviews"])
-            
-            llm_input += f"{key}\n reviews:\n\n"
 
-            for review in reviews[:3]:  # only first 3
-                llm_input += f"- {review}\n"
-
-            llm_input += "\n\n"
-        
-        # Transform into response model
-        places = []
-        for doc in top_places:
-            place = Place(
-                place_id=doc["id"],
-                name=doc["name"],
-                neighborhood=doc.get("neighborhood"),
-                latitude=None,
-                longitude=None,
-                tags=None,
-                description=doc.get("description"),
-                reviews=doc.get("reviews"),
-                emoji=doc.get("emoji"),
-                score=doc.get("score")
-            )
-            places.append(place)
-        
-        prompt = (f"Summarize the following results"
-            f"\nsearch_engine_results: {llm_input}"
-            f"\nas if you were responding to this query:{query}"
-            f"\nStart with something like 'I think you'd like the following:'"
-            f"\nOnly talk about the top 3 results"
-        )
-
-        llm_response = llm.invoke(prompt)
-
-        return SearchResponse(
-            llm_response=llm_response.content,
-            places=places,
-            total_results=len(places),
-            query=query
-        )
+        return await respond_with_places(query, top_places)
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Deep Search failed: {str(e)}")
@@ -364,57 +410,15 @@ async def run_quick_search(query: str):
             return_documents=True,
         )
 
-        # Add reranked score to places and format for LLM input
         top_places = []
-        llm_input = ""
-
         for doc in reranked.data:
             key = doc.document.text
             original_place = formatted_results[key]["metadata"].copy()
             original_place["id"] = formatted_results[key]["id"]
             original_place["score"] = round(doc.score, 6)
             top_places.append(original_place)
-            reviews = ast.literal_eval(original_place["reviews"])
-            
-            llm_input += f"{key}\n reviews:\n\n"
 
-            for review in reviews[:3]:  # only first 3
-                llm_input += f"- {review}\n"
-
-            llm_input += "\n\n"
-        
-        # Transform into response model
-        places = []
-        for doc in top_places:
-            place = Place(
-                place_id=doc["id"],
-                name=doc["name"],
-                neighborhood=doc.get("neighborhood"),
-                latitude=None,
-                longitude=None,
-                tags=None,
-                description=doc.get("description"),
-                reviews=doc.get("reviews"),
-                emoji=doc.get("emoji"),
-                score=doc.get("score")
-            )
-            places.append(place)
-        
-        prompt = (f"Summarize the following results"
-            f"\nsearch_engine_results: {llm_input}"
-            f"\nas if you were responding to this query:{query}"
-            f"\nStart with something like 'I think you'd like the following:'"
-            f"\nOnly talk about the top 3 results"
-        )
-
-        llm_response = llm.invoke(prompt)
-
-        return SearchResponse(
-            llm_response=llm_response.content,
-            places=places,
-            total_results=len(places),
-            query=query
-        )
+        return await respond_with_places(query, top_places)
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Quick Search failed: {str(e)}")
