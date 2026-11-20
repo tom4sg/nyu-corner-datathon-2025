@@ -21,6 +21,12 @@ if _MEDIA_PATH.exists():
 else:
     logging.warning("Place photo file not found at %s", _MEDIA_PATH)
 
+_RATINGS_PATH = Path(__file__).parent / "data" / "google_ratings.json"
+_GOOGLE_RATINGS: Dict[str, dict] = {}
+if _RATINGS_PATH.exists():
+    with _RATINGS_PATH.open() as ratings_file:
+        _GOOGLE_RATINGS = json.load(ratings_file)
+
 
 def image_urls_for(place_id: str) -> List[str]:
     urls = _PLACE_MEDIA.get(place_id) or []
@@ -30,6 +36,11 @@ def image_urls_for(place_id: str) -> List[str]:
 def maps_search_url(name: str, neighborhood: Optional[str]) -> str:
     query = f"{name}, {neighborhood or 'New York'}, NY"
     return "https://www.google.com/maps/search/?api=1&query=" + urllib.parse.quote_plus(query)
+
+
+def maps_place_url(name: str, google_place_id: str) -> str:
+    query = urllib.parse.urlencode({"api": "1", "query": name, "query_place_id": google_place_id})
+    return "https://www.google.com/maps/search/?" + query
 
 
 def _float_or_none(value) -> Optional[float]:
@@ -207,9 +218,23 @@ def review_snippet(reviews: List[str], query: str, max_chars: int = 120) -> Opti
     return ("..." if start else "") + excerpt + ("..." if end < len(best_review) else "")
 
 
+def google_rating_for(place_id: str) -> dict:
+    record = _GOOGLE_RATINGS.get(place_id) or {}
+    rating = record.get("rating")
+    count = record.get("review_count")
+    return {
+        "google_rating": float(rating) if isinstance(rating, (int, float)) else None,
+        "google_review_count": int(count) if isinstance(count, int) else None,
+        "google_place_id": record.get("google_place_id") or None,
+    }
+
+
 def build_place_fields(doc: dict) -> dict:
     name = doc.get("name") or "Unknown"
     neighborhood = doc.get("neighborhood")
+    google = google_rating_for(doc["id"])
+    google_place_id = google.pop("google_place_id")
+    maps_url = maps_place_url(name, google_place_id) if google_place_id else maps_search_url(name, neighborhood)
     return {
         "place_id": doc["id"],
         "name": name,
@@ -222,5 +247,6 @@ def build_place_fields(doc: dict) -> dict:
         "emoji": doc.get("emoji"),
         "score": float(doc.get("score") or 0),
         "image_urls": image_urls_for(doc["id"]),
-        "maps_url": maps_search_url(name, neighborhood),
+        "maps_url": maps_url,
+        **google,
     }

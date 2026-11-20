@@ -48,6 +48,8 @@ class Place(BaseModel):
     score: float
     image_urls: List[str] = Field(default_factory=list)
     maps_url: Optional[str] = None
+    google_rating: Optional[float] = None
+    google_review_count: Optional[int] = None
 
 class SearchResponse(BaseModel):
     llm_response: str

@@ -3,6 +3,7 @@
 import { MouseEvent } from 'react';
 import { Place } from '@/types/place';
 import { PlacePhoto } from '@/components/PlaceDetails';
+import GoogleRating from '@/components/GoogleRating';
 
 interface ResultsListProps {
   places: Place[];
@@ -68,7 +69,11 @@ function ResultCard({ place, index }: { place: Place; index: number }) {
             {place.neighborhood && (
               <span className="font-medium">{place.neighborhood}</span>
             )}
-            {place.neighborhood && place.description && (
+            {place.neighborhood && typeof place.google_rating === 'number' && (
+              <span aria-hidden className="h-3.5 w-px bg-gray-400 dark:bg-gray-600" />
+            )}
+            <GoogleRating rating={place.google_rating} count={place.google_review_count} />
+            {place.description && (place.neighborhood || typeof place.google_rating === 'number') && (
               <span aria-hidden className="h-3.5 w-px bg-gray-400 dark:bg-gray-600" />
             )}
             {place.description && (

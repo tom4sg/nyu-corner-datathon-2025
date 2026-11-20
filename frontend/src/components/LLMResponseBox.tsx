@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown, { Components } from 'react-markdown';
 import { Place, Recommendation } from '@/types/place';
 import { PlacePhoto } from '@/components/PlaceDetails';
+import GoogleRating from '@/components/GoogleRating';
 
 interface LLMResponseBoxProps {
   llmResponse: string;
@@ -223,6 +224,7 @@ export default function LLMResponseBox({
                     {place.neighborhood && (
                       <span className="text-sm text-gray-500 dark:text-gray-400">{place.neighborhood}</span>
                     )}
+                    <GoogleRating rating={place.google_rating} count={place.google_review_count} />
                   </div>
                   <BlurbWithPhoto text={shown} complete={shown.length === pick.blurb.length} place={place} />
                   {place.maps_url && (
