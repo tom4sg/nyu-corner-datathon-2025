@@ -219,7 +219,18 @@ export default function LLMResponseBox({
                 <section key={place.place_id} className="fade-up border-t border-gray-200 pt-5 dark:border-white/10">
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                     <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                      {place.name}
+                      {place.maps_url ? (
+                        <a
+                          href={place.maps_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline"
+                        >
+                          {place.name}
+                        </a>
+                      ) : (
+                        place.name
+                      )}
                     </h4>
                     {place.neighborhood && (
                       <span className="text-sm text-gray-500 dark:text-gray-400">{place.neighborhood}</span>

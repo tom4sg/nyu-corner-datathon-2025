@@ -16,15 +16,15 @@ function openPlace(event: MouseEvent, url?: string) {
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 
-function ReviewSnippet({ snippet, mapsUrl }: { snippet: string; mapsUrl?: string }) {
+function ReviewSnippet({ snippet, reviewsUrl }: { snippet: string; reviewsUrl?: string }) {
   return (
     <p className="mt-2 text-sm leading-5 text-gray-600 dark:text-gray-400">
       <span className="italic">&ldquo;{snippet}&rdquo;</span>
-      {mapsUrl && (
+      {reviewsUrl && (
         <>
           {' '}
           <a
-            href={mapsUrl}
+            href={reviewsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium text-gray-900 hover:underline dark:text-gray-100"
@@ -90,7 +90,7 @@ function ResultCard({ place, index }: { place: Place; index: number }) {
           </div>
 
           {place.review_snippet && (
-            <ReviewSnippet snippet={place.review_snippet} mapsUrl={place.maps_url} />
+            <ReviewSnippet snippet={place.review_snippet} reviewsUrl={place.reviews_url} />
           )}
         </div>
       </div>

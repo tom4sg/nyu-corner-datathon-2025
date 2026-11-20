@@ -12,6 +12,7 @@ export interface Place {
   score: number;
   image_urls?: string[];
   maps_url?: string;
+  reviews_url?: string;
   google_rating?: number;
   google_review_count?: number;
 }

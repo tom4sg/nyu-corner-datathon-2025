@@ -43,6 +43,10 @@ def maps_place_url(name: str, google_place_id: str) -> str:
     return "https://www.google.com/maps/search/?" + query
 
 
+def google_reviews_url(google_place_id: str) -> str:
+    return "https://search.google.com/local/reviews?placeid=" + urllib.parse.quote(google_place_id)
+
+
 def _float_or_none(value) -> Optional[float]:
     if value is None or value == "":
         return None
@@ -235,6 +239,7 @@ def build_place_fields(doc: dict) -> dict:
     google = google_rating_for(doc["id"])
     google_place_id = google.pop("google_place_id")
     maps_url = maps_place_url(name, google_place_id) if google_place_id else maps_search_url(name, neighborhood)
+    reviews_url = google_reviews_url(google_place_id) if google_place_id else None
     return {
         "place_id": doc["id"],
         "name": name,
@@ -248,5 +253,6 @@ def build_place_fields(doc: dict) -> dict:
         "score": float(doc.get("score") or 0),
         "image_urls": image_urls_for(doc["id"]),
         "maps_url": maps_url,
+        "reviews_url": reviews_url,
         **google,
     }
