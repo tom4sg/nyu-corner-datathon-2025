@@ -279,7 +279,7 @@ export default function Home() {
                       type="button"
                       onClick={searchMore}
                       disabled={moreLoading || moreExhausted}
-                      className="w-full rounded-xl border border-black/[0.08] py-3 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:text-gray-400 dark:border-white/[0.1] dark:text-gray-400 dark:hover:bg-white/[0.04] dark:hover:text-gray-100"
+                      className="text-sm font-medium text-gray-900 underline-offset-2 hover:underline active:underline disabled:cursor-default disabled:text-gray-400 disabled:no-underline dark:text-gray-100 dark:disabled:text-gray-500"
                     >
                       {moreLoading ? 'Searching…' : moreExhausted ? 'No more places' : 'Search more'}
                     </button>

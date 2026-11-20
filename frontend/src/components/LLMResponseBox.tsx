@@ -113,8 +113,22 @@ function BlurbWithPhoto({
   );
 }
 
-const STAGGER_MS = 460;
 const CHARS_PER_SECOND = 115;
+const GAP_MS = 180;
+
+function scheduleStart(parts: string[], index: number) {
+  let start = 0;
+  for (let i = 0; i < index; i++) {
+    start += ((parts[i]?.length ?? 0) / CHARS_PER_SECOND) * 1000 + GAP_MS;
+  }
+  return start;
+}
+
+function scheduleEnd(parts: string[]) {
+  if (parts.length === 0) return 0;
+  const last = parts.length - 1;
+  return scheduleStart(parts, last) + ((parts[last]?.length ?? 0) / CHARS_PER_SECOND) * 1000;
+}
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -137,9 +151,7 @@ function useArrival(parts: string[]) {
     let frame = 0;
     const tick = (now: number) => {
       const elapsed = now - origin;
-      const done = current.every((part, index) => {
-        return ((elapsed - index * STAGGER_MS) / 1000) * CHARS_PER_SECOND >= part.length;
-      });
+      const done = elapsed >= scheduleEnd(current);
       setClock({ key, elapsed, settled: done });
       if (!done) frame = requestAnimationFrame(tick);
     };
@@ -151,7 +163,7 @@ function useArrival(parts: string[]) {
   const sliceAt = (index: number) => {
     const part = parts[index] ?? '';
     if (active.settled) return part;
-    const start = index * STAGGER_MS;
+    const start = scheduleStart(parts, index);
     if (active.elapsed < start) return null;
     const count = Math.min(part.length, Math.floor(((active.elapsed - start) / 1000) * CHARS_PER_SECOND));
     return part.slice(0, count);
