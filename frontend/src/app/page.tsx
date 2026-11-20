@@ -189,7 +189,7 @@ export default function Home() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-semibold text-gray-900">
-                    Search Results
+                    All Search Results
                   </h2>
                   <span className="text-gray-600">
                     {places.length} places found
@@ -204,7 +204,7 @@ export default function Home() {
           {loading && (
             <div className="mb-6 animate-in fade-in duration-500">
               <h3 className="thinking-shimmer w-fit text-lg font-semibold">
-                AI Response
+                Top Choices
               </h3>
             </div>
           )}
