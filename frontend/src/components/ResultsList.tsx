@@ -17,7 +17,7 @@ function openPlace(event: MouseEvent, url?: string) {
 
 function ReviewSnippet({ snippet, mapsUrl }: { snippet: string; mapsUrl?: string }) {
   return (
-    <p className="mt-2 text-sm leading-5 text-gray-600">
+    <p className="mt-2 text-sm leading-5 text-gray-600 dark:text-gray-400">
       <span className="italic">&ldquo;{snippet}&rdquo;</span>
       {mapsUrl && (
         <>
@@ -26,7 +26,7 @@ function ReviewSnippet({ snippet, mapsUrl }: { snippet: string; mapsUrl?: string
             href={mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-gray-900 hover:underline"
+            className="font-medium text-gray-900 hover:underline dark:text-gray-100"
           >
             more
           </a>
@@ -40,7 +40,7 @@ function ResultCard({ place, index }: { place: Place; index: number }) {
   return (
     <article
       onClick={(event) => openPlace(event, place.maps_url)}
-      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-4 sm:p-6 animate-in fade-in duration-500 ${
+      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-4 sm:p-6 animate-in fade-in duration-500 dark:bg-[#1c1c1e] dark:shadow-none dark:ring-1 dark:ring-white/[0.06] ${
         place.maps_url ? 'cursor-pointer' : ''
       }`}
       style={{ animationDelay: `${index * 100}ms` }}
@@ -48,7 +48,7 @@ function ResultCard({ place, index }: { place: Place; index: number }) {
       <div className="flex items-start gap-4">
         <PlacePhoto urls={place.image_urls} name={place.name} href={place.maps_url} baseSize={134} />
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-bold text-gray-800">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
             {index + 1}.{' '}
             {place.maps_url ? (
               <a
@@ -64,12 +64,12 @@ function ResultCard({ place, index }: { place: Place; index: number }) {
             )}
           </h3>
 
-          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-600">
+          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-600 dark:text-gray-400">
             {place.neighborhood && (
               <span className="font-medium">{place.neighborhood}</span>
             )}
             {place.neighborhood && place.description && (
-              <span aria-hidden className="h-3.5 w-px bg-gray-400" />
+              <span aria-hidden className="h-3.5 w-px bg-gray-400 dark:bg-gray-600" />
             )}
             {place.description && (
               <span className="font-inter">{place.description}</span>
@@ -77,7 +77,7 @@ function ResultCard({ place, index }: { place: Place; index: number }) {
             {place.tags?.map((tag, tagIndex) => (
               <span
                 key={tagIndex}
-                className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full"
+                className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full dark:bg-white/10 dark:text-gray-300"
               >
                 {tag.replaceAll('_', ' ')}
               </span>

@@ -15,8 +15,8 @@ function prefersReducedMotion() {
 export function IntroLogo() {
   return (
     <div className="flex items-center justify-center gap-2.5">
-      <h1 className="text-[44px] font-semibold leading-none tracking-[-0.04em] text-gray-900">Vibio</h1>
-      <img src="/vibio_pin_128x128.png" alt="" className="h-9 w-9 object-contain" />
+      <h1 className="text-[44px] font-semibold leading-none tracking-[-0.04em] text-gray-900 dark:text-gray-100">Vibio</h1>
+      <img src="/vibio_pin_128x128.png" alt="" className="h-9 w-9 object-contain dark:invert" />
     </div>
   );
 }
@@ -56,7 +56,7 @@ export function Typewriter({ text, animate }: { text: string; animate: boolean }
   const typing = animate && count > 0 && count < text.length;
 
   return (
-    <p className="mx-auto max-w-md text-[15px] leading-relaxed text-gray-500" aria-label={text}>
+    <p className="mx-auto max-w-md text-[15px] leading-relaxed text-gray-500 dark:text-gray-400" aria-label={text}>
       <span aria-hidden>{text.slice(0, count)}</span>
       <span
         aria-hidden

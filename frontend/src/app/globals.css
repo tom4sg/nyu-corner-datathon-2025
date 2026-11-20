@@ -1,9 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #111113;
+  --foreground: #f5f5f7;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -12,13 +21,6 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-inter: 'Inter', sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
@@ -56,27 +58,29 @@ body {
 }
 
 @keyframes thinking-shimmer {
-  0% { background-position: 160% 0; }
-  48% { background-position: -60% 0; }
-  100% { background-position: -60% 0; }
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .thinking-shimmer {
+  color: #1d1d1f;
   background-image: linear-gradient(
-    100deg,
-    #1d1d1f 0%,
-    #1d1d1f 42%,
-    #6e6e73 47.5%,
-    #f5f5f7 50%,
-    #6e6e73 52.5%,
-    #1d1d1f 58%,
-    #1d1d1f 100%
+    90deg,
+    color-mix(in srgb, currentColor 60%, transparent) 0%,
+    color-mix(in srgb, currentColor 60%, transparent) 25%,
+    currentColor 60%,
+    color-mix(in srgb, currentColor 60%, transparent) 75%,
+    color-mix(in srgb, currentColor 60%, transparent) 100%
   );
-  background-size: 220% 100%;
+  background-size: 200% 100%;
   background-clip: text;
   -webkit-background-clip: text;
-  color: transparent;
-  animation: thinking-shimmer 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  -webkit-text-fill-color: transparent;
+  animation: thinking-shimmer 2s linear infinite;
+}
+
+.dark .thinking-shimmer {
+  color: #f5f5f7;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -86,7 +90,12 @@ body {
   }
 
   .thinking-shimmer {
-    color: #9ca3af;
+    color: #1d1d1f;
     background: none;
+    -webkit-text-fill-color: currentColor;
+  }
+
+  .dark .thinking-shimmer {
+    color: #f5f5f7;
   }
 }

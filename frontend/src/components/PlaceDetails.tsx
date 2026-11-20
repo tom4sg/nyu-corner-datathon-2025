@@ -92,7 +92,7 @@ export function PlacePhoto({
         }
       }}
       style={{ width: size, height: size }}
-      className="rounded-lg bg-gray-100 object-cover"
+      className="rounded-lg bg-gray-100 object-cover dark:bg-white/10"
     />
   );
 
@@ -122,7 +122,7 @@ export function PlacePhoto({
           event.stopPropagation();
           setDragSize(null);
         }}
-        className="absolute -bottom-1 -right-1 h-4 w-4 cursor-nwse-resize touch-none rounded-sm border border-gray-300 bg-white/90 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 focus:opacity-100"
+        className="absolute -bottom-1 -right-1 h-4 w-4 cursor-nwse-resize touch-none rounded-sm border border-gray-300 bg-white/90 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 focus:opacity-100 dark:border-white/20 dark:bg-[#2c2c2e]"
       />
     </div>
   );

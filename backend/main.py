@@ -32,6 +32,7 @@ load_dotenv()
 class SearchRequest(BaseModel):
     query: str
     mode: str
+    exclude_ids: List[str] = Field(default_factory=list)
 
 class Place(BaseModel):
     place_id: str
@@ -190,34 +191,63 @@ def format_place_strings_quick(places: List[Dict]) -> Dict[str, Dict]:
 # Define Async Pinecone query functions per index
 executor = ThreadPoolExecutor()
 
-async def pinecone_image_query(clip_embedding):
+def candidate_count(exclude_ids: List[str]) -> int:
+    if not exclude_ids:
+        return 10
+    return min(len(exclude_ids) + 16, 100)
+
+
+def result_id(value) -> str:
+    if isinstance(value, dict):
+        return str(value.get("id") or "")
+    return str(getattr(value, "id", "") or "")
+
+
+def without_excluded(results: Dict[str, Dict], exclude_ids: List[str]) -> Dict[str, Dict]:
+    excluded = set(exclude_ids)
+    if not excluded:
+        return results
+    return {key: value for key, value in results.items() if result_id(value) not in excluded}
+
+
+def places_only(query: str, top_places: List[dict]) -> SearchResponse:
+    places = [place_from_doc(doc, query) for doc in top_places]
+    return SearchResponse(
+        llm_response="",
+        places=places,
+        total_results=len(places),
+        query=query,
+    )
+
+
+async def pinecone_image_query(clip_embedding, top_k=10):
     return await asyncio.get_event_loop().run_in_executor(executor, lambda: (
         image_index.query(
             namespace="images", 
             vector=clip_embedding, 
-            top_k=10,
+            top_k=top_k,
             include_metadata=True,
             include_values=False
         )
     ))
 
-async def pinecone_sparse_query(values, indices):
+async def pinecone_sparse_query(values, indices, top_k=10):
     return await asyncio.get_event_loop().run_in_executor(executor, lambda: (
         sparse_index.query(
             namespace="metadata", 
             sparse_vector={"values": values, "indices": indices},
-            top_k=10,
+            top_k=top_k,
             include_metadata=True,
             include_values=False
         )
     ))
 
-async def pinecone_dense_query(dense_embedding):
+async def pinecone_dense_query(dense_embedding, top_k=10):
     return await asyncio.get_event_loop().run_in_executor(executor, lambda: (
         dense_index.query(
             namespace="metadata", 
             vector=dense_embedding, 
-            top_k=10,
+            top_k=top_k,
             include_metadata=True,
             include_values=False
         )
@@ -248,10 +278,12 @@ async def search_places(request: SearchRequest):
     try:
         query = request.query
 
+        exclude_ids = request.exclude_ids or []
+        summarize = not exclude_ids
         if request.mode == "deep":
-            return await run_hybrid_search(query)
+            return await run_hybrid_search(query, exclude_ids, summarize)
         elif request.mode == "quick":
-            return await run_quick_search(query)
+            return await run_quick_search(query, exclude_ids, summarize)
         else:
             raise HTTPException(status_code=400, detail=f"Invalid mode: {request.mode}")
     except Exception as e:
@@ -343,7 +375,7 @@ def reranked_score(doc) -> float:
     return round(float(score or 0), 6)
 
 
-async def run_hybrid_search(query: str):
+async def run_hybrid_search(query: str, exclude_ids: Optional[List[str]] = None, summarize: bool = True):
     """
     Run the deep/hybrid search with CLIP, SPLADE, and dense embeddings
     """
@@ -372,24 +404,27 @@ async def run_hybrid_search(query: str):
 
         # Get dense embedding
         dense_embedding = metadata_model.encode([query], normalize_embeddings=True)[0].astype('float32').tolist()
+        top_k = candidate_count(exclude_ids or [])
 
         # Async Pinecone queries
-        image_q = pinecone_image_query(clip_embedding)
-        sparse_q = pinecone_sparse_query(values, indices)
-        dense_q = pinecone_dense_query(dense_embedding)
+        image_q = pinecone_image_query(clip_embedding, top_k)
+        sparse_q = pinecone_sparse_query(values, indices, top_k)
+        dense_q = pinecone_dense_query(dense_embedding, top_k)
 
         image_results, sparse_results, dense_results = await asyncio.gather(image_q, sparse_q, dense_q)
 
         # Merge all results
         hybrid_results = merge_matches(dense_results, sparse_results, image_results)
-        formatted_results = format_place_strings_deep(hybrid_results)
+        formatted_results = without_excluded(format_place_strings_deep(hybrid_results), exclude_ids or [])
+        if not formatted_results:
+            return places_only(query, [])
 
         # Rerank with BGE
         reranked = pc.inference.rerank(
             model="bge-reranker-v2-m3",
             query=query,
             documents=list(formatted_results.keys()),
-            top_n=8,
+            top_n=min(8, len(formatted_results)),
             return_documents=True,
         )
 
@@ -400,6 +435,8 @@ async def run_hybrid_search(query: str):
             original_place["score"] = reranked_score(doc)
             top_places.append(original_place)
 
+        if not summarize:
+            return places_only(query, top_places)
         return await respond_with_places(query, top_places)
         
     except Exception as e:
@@ -407,20 +444,22 @@ async def run_hybrid_search(query: str):
     
     
 
-async def run_quick_search(query: str):
+async def run_quick_search(query: str, exclude_ids: Optional[List[str]] = None, summarize: bool = True):
     """
     Run quick search - placeholder for you to fill in
     """
     try:
         dense_embedding = metadata_model.encode([query], normalize_embeddings=True)[0].astype('float32').tolist()
-        dense_q = await pinecone_dense_query(dense_embedding)
-        formatted_results = format_place_strings_quick(dense_q)
+        dense_q = await pinecone_dense_query(dense_embedding, candidate_count(exclude_ids or []))
+        formatted_results = without_excluded(format_place_strings_quick(dense_q), exclude_ids or [])
+        if not formatted_results:
+            return places_only(query, [])
 
         reranked = pc.inference.rerank(
             model="bge-reranker-v2-m3",
             query=query,
             documents=list(formatted_results.keys()),
-            top_n=8,
+            top_n=min(8, len(formatted_results)),
             return_documents=True,
         )
 
@@ -432,6 +471,8 @@ async def run_quick_search(query: str):
             original_place["score"] = reranked_score(doc)
             top_places.append(original_place)
 
+        if not summarize:
+            return places_only(query, top_places)
         return await respond_with_places(query, top_places)
         
     except Exception as e:
