@@ -135,7 +135,6 @@ export default function LLMResponseBox({
   if (!llmResponse && recommendations.length === 0) return null;
 
   const placesById = new Map(places.map((place) => [place.place_id, place]));
-  const rankById = new Map(places.map((place, index) => [place.place_id, index + 1]));
   const picks = recommendations
     .map((pick) => {
       const place = placesById.get(pick.place_id);
@@ -160,7 +159,7 @@ export default function LLMResponseBox({
               <section key={place.place_id} className="border-t border-gray-200 pt-5">
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                   <h4 className="text-lg font-bold text-gray-900">
-                    {rankById.get(place.place_id)}. {place.name}
+                    {place.name}
                   </h4>
                   {place.neighborhood && (
                     <span className="text-sm text-gray-500">{place.neighborhood}</span>

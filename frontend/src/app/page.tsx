@@ -24,6 +24,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [resultsOpen, setResultsOpen] = useState(false);
   const [playIntro, setPlayIntro] = useState(true);
   const [heroLeaving, setHeroLeaving] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -62,6 +63,7 @@ export default function Home() {
     setLoading(true);
     setError(null);
     setQuery(searchQuery);
+    setResultsOpen(false);
 
     try {
       // API URL must be set in production
@@ -189,13 +191,29 @@ export default function Home() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-semibold text-gray-900">
-                    All Search Results
+                    <button
+                      type="button"
+                      onClick={() => setResultsOpen((open) => !open)}
+                      aria-expanded={resultsOpen}
+                      className="flex items-center gap-2"
+                    >
+                      <svg
+                        aria-hidden
+                        className={`h-3.5 w-3.5 text-gray-400 transition-transform duration-200 ${resultsOpen ? 'rotate-90' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="M9 5l7 7-7 7" />
+                      </svg>
+                      All Search Results
+                    </button>
                   </h2>
                   <span className="text-gray-600">
                     {places.length} places found
                   </span>
                 </div>
-                <ResultsList places={places} />
+                {resultsOpen && <ResultsList places={places} />}
               </div>
             </div>
           )}
