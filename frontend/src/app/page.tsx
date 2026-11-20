@@ -275,14 +275,16 @@ export default function Home() {
                 {resultsOpen && (
                   <>
                     <ResultsList places={places} />
-                    <button
-                      type="button"
-                      onClick={searchMore}
-                      disabled={moreLoading || moreExhausted}
-                      className="text-sm font-medium text-gray-900 underline-offset-2 hover:underline active:underline disabled:cursor-default disabled:text-gray-400 disabled:no-underline dark:text-gray-100 dark:disabled:text-gray-500"
-                    >
-                      {moreLoading ? 'Searching…' : moreExhausted ? 'No more places' : 'Search more'}
-                    </button>
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={searchMore}
+                        disabled={moreLoading || moreExhausted}
+                        className="text-sm font-medium text-gray-900 underline-offset-2 hover:underline active:underline disabled:cursor-default disabled:text-gray-400 disabled:no-underline dark:text-gray-100 dark:disabled:text-gray-500"
+                      >
+                        {moreLoading ? 'Searching…' : moreExhausted ? 'No more places' : 'Search more'}
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
