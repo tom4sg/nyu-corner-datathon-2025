@@ -203,14 +203,9 @@ export default function Home() {
           {/* AI Response Loading State */}
           {loading && (
             <div className="mb-6 animate-in fade-in duration-500">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  AI Response
-                </h3>
-                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify font-inter">
-                  <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse"></span>
-                </div>
-              </div>
+              <h3 className="thinking-shimmer w-fit text-lg font-semibold">
+                AI Response
+              </h3>
             </div>
           )}
 

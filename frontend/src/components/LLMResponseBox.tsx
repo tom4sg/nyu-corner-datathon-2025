@@ -109,17 +109,14 @@ export default function LLMResponseBox({
   recommendations,
 }: LLMResponseBoxProps) {
   const [displayedText, setDisplayedText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const structured = recommendations.length > 0;
 
   useEffect(() => {
     if (!llmResponse || structured) {
       setDisplayedText('');
-      setIsTyping(false);
       return;
     }
 
-    setIsTyping(true);
     setDisplayedText('');
 
     let index = 0;
@@ -128,7 +125,6 @@ export default function LLMResponseBox({
         setDisplayedText(llmResponse.slice(0, index + 1));
         index++;
       } else {
-        setIsTyping(false);
         clearInterval(interval);
       }
     }, 20);
@@ -193,7 +189,6 @@ export default function LLMResponseBox({
             <ReactMarkdown components={markdownComponents}>
               {displayedText}
             </ReactMarkdown>
-            {isTyping && <span className="inline-block w-2 h-4 bg-indigo-500 ml-1 animate-pulse" />}
           </div>
         )}
         <div className="text-sm text-gray-500">

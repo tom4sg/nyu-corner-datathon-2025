@@ -55,8 +55,35 @@ body {
   animation: fade-up 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes thinking-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0% 0; }
+}
+
+.thinking-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    #9ca3af 0%,
+    #9ca3af 35%,
+    #111827 50%,
+    #9ca3af 65%,
+    #9ca3af 100%
+  );
+  background-size: 220% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: thinking-shimmer 1.8s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .fade-up {
+  .fade-up,
+  .thinking-shimmer {
     animation: none;
+  }
+
+  .thinking-shimmer {
+    color: #9ca3af;
+    background: none;
   }
 }
