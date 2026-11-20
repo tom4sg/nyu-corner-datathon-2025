@@ -97,6 +97,8 @@ function BlurbWithPhoto({
     setExpanded(false);
   }, [place.place_id]);
 
+  const phone = place.phone?.trim();
+
   return (
     <div className="mt-3 flex items-start gap-3">
       <PlacePhoto
@@ -107,8 +109,18 @@ function BlurbWithPhoto({
         scale={1.75}
         holdSize={expanded}
       />
-      <div ref={textRef} className="min-w-0 flex-1">
-        <ExpandableText text={text} complete={complete} expanded={expanded} setExpanded={setExpanded} />
+      <div className="flex min-w-0 flex-1 flex-col self-stretch">
+        <div ref={textRef}>
+          <ExpandableText text={text} complete={complete} expanded={expanded} setExpanded={setExpanded} />
+        </div>
+        {phone && (
+          <a
+            href={`tel:${phone.replace(/[^\d+]/g, '')}`}
+            className="mt-auto self-end pt-2 text-sm text-gray-900 underline underline-offset-2 dark:text-gray-100"
+          >
+            {phone}
+          </a>
+        )}
       </div>
     </div>
   );

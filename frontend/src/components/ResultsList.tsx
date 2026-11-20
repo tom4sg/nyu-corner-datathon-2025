@@ -16,15 +16,23 @@ function openPlace(event: MouseEvent, url?: string) {
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 
-function ReviewSnippet({ snippet, reviewsUrl }: { snippet: string; reviewsUrl?: string }) {
+function reviewsHref(place: Place): string | undefined {
+  if (place.reviews_url) return place.reviews_url;
+  if (!place.maps_url) return undefined;
+  const placeId = new URL(place.maps_url, 'https://www.google.com').searchParams.get('query_place_id');
+  if (placeId) return `https://search.google.com/local/reviews?placeid=${encodeURIComponent(placeId)}`;
+  return place.maps_url;
+}
+
+function ReviewSnippet({ snippet, href }: { snippet: string; href?: string }) {
   return (
     <p className="mt-2 text-sm leading-5 text-gray-600 dark:text-gray-400">
       <span className="italic">&ldquo;{snippet}&rdquo;</span>
-      {reviewsUrl && (
+      {href && (
         <>
           {' '}
           <a
-            href={reviewsUrl}
+            href={href}
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium text-gray-900 hover:underline dark:text-gray-100"
@@ -90,7 +98,7 @@ function ResultCard({ place, index }: { place: Place; index: number }) {
           </div>
 
           {place.review_snippet && (
-            <ReviewSnippet snippet={place.review_snippet} reviewsUrl={place.reviews_url} />
+            <ReviewSnippet snippet={place.review_snippet} href={reviewsHref(place)} />
           )}
         </div>
       </div>

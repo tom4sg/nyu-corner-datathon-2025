@@ -15,6 +15,7 @@ export interface Place {
   reviews_url?: string;
   google_rating?: number;
   google_review_count?: number;
+  phone?: string;
 }
 
 export interface Recommendation {

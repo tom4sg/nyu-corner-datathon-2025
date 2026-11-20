@@ -51,6 +51,7 @@ class Place(BaseModel):
     reviews_url: Optional[str] = None
     google_rating: Optional[float] = None
     google_review_count: Optional[int] = None
+    phone: Optional[str] = None
 
 class SearchResponse(BaseModel):
     llm_response: str

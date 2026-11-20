@@ -169,16 +169,17 @@ def lookup(row: dict, key: str) -> dict:
     )
     match = choose(found.get("places") or [], name, lat, lon)
     if not match:
-        return {"google_place_id": None, "rating": None, "review_count": None}
+        return {"google_place_id": None, "rating": None, "review_count": None, "phone": None}
     details = request(
         f"https://places.googleapis.com/v1/places/{match['id']}",
         key,
-        "rating,userRatingCount",
+        "rating,userRatingCount,nationalPhoneNumber",
     )
     return {
         "google_place_id": match["id"],
         "rating": details.get("rating"),
         "review_count": details.get("userRatingCount"),
+        "phone": details.get("nationalPhoneNumber"),
     }
 
 

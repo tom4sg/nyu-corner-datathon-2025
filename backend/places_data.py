@@ -229,6 +229,7 @@ def google_rating_for(place_id: str) -> dict:
     return {
         "google_rating": float(rating) if isinstance(rating, (int, float)) else None,
         "google_review_count": int(count) if isinstance(count, int) else None,
+        "phone": record.get("phone") or None,
         "google_place_id": record.get("google_place_id") or None,
     }
 
