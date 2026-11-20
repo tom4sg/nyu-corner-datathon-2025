@@ -329,6 +329,20 @@ async def respond_with_places(query: str, top_places: List[dict]) -> SearchRespo
     )
 
 
+def reranked_document_text(doc) -> str:
+    document = doc.get("document") if isinstance(doc, dict) else getattr(doc, "document", None)
+    if isinstance(document, dict):
+        return document.get("text") or ""
+    if isinstance(document, str):
+        return document
+    return getattr(document, "text", "") or ""
+
+
+def reranked_score(doc) -> float:
+    score = doc.get("score") if isinstance(doc, dict) else getattr(doc, "score", 0)
+    return round(float(score or 0), 6)
+
+
 async def run_hybrid_search(query: str):
     """
     Run the deep/hybrid search with CLIP, SPLADE, and dense embeddings
@@ -381,9 +395,9 @@ async def run_hybrid_search(query: str):
 
         top_places = []
         for doc in reranked.data:
-            key = doc.document.text
+            key = reranked_document_text(doc)
             original_place = formatted_results[key].copy()
-            original_place["score"] = round(doc.score, 6)
+            original_place["score"] = reranked_score(doc)
             top_places.append(original_place)
 
         return await respond_with_places(query, top_places)
@@ -412,10 +426,10 @@ async def run_quick_search(query: str):
 
         top_places = []
         for doc in reranked.data:
-            key = doc.document.text
+            key = reranked_document_text(doc)
             original_place = formatted_results[key]["metadata"].copy()
             original_place["id"] = formatted_results[key]["id"]
-            original_place["score"] = round(doc.score, 6)
+            original_place["score"] = reranked_score(doc)
             top_places.append(original_place)
 
         return await respond_with_places(query, top_places)
