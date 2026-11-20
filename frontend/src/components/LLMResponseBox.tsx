@@ -97,8 +97,6 @@ function BlurbWithPhoto({
     setExpanded(false);
   }, [place.place_id]);
 
-  const phone = place.phone?.trim();
-
   return (
     <div className="mt-3 flex items-start gap-3">
       <PlacePhoto
@@ -109,18 +107,8 @@ function BlurbWithPhoto({
         scale={1.75}
         holdSize={expanded}
       />
-      <div className="flex min-w-0 flex-1 flex-col self-stretch">
-        <div ref={textRef}>
-          <ExpandableText text={text} complete={complete} expanded={expanded} setExpanded={setExpanded} />
-        </div>
-        {phone && (
-          <a
-            href={`tel:${phone.replace(/[^\d+]/g, '')}`}
-            className="mt-auto self-end pt-2 text-sm text-gray-900 underline underline-offset-2 dark:text-gray-100"
-          >
-            {phone}
-          </a>
-        )}
+      <div ref={textRef} className="min-w-0 flex-1">
+        <ExpandableText text={text} complete={complete} expanded={expanded} setExpanded={setExpanded} />
       </div>
     </div>
   );
@@ -250,15 +238,15 @@ export default function LLMResponseBox({
                     <GoogleRating rating={place.google_rating} count={place.google_review_count} />
                   </div>
                   <BlurbWithPhoto text={shown} complete={shown.length === pick.blurb.length} place={place} />
-                  {place.maps_url && (
-                    <a
-                      href={place.maps_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 inline-block text-sm font-medium text-gray-900 underline underline-offset-2 dark:text-gray-100"
-                    >
-                      {place.name} on Google Maps
-                    </a>
+                  {place.phone?.trim() && (
+                    <div className="mt-3 flex justify-end">
+                      <a
+                        href={`tel:${place.phone.replace(/[^\d+]/g, '')}`}
+                        className="text-sm text-gray-900 underline underline-offset-2 dark:text-gray-100"
+                      >
+                        {place.phone.trim()}
+                      </a>
+                    </div>
                   )}
                 </section>
               );
